@@ -2,12 +2,13 @@ package i18n
 
 var ptMessages = map[string]string{
 	// Chrome
-	"brand.tagline": "Diário da Gratidão",
-	"nav.today":     "Hoje",
-	"nav.register":  "Registrar",
-	"nav.memories":  "Memórias",
-	"nav.insights":  "Insights",
-	"layout.footer": "Feito com carinho para a sua prática diária",
+	"brand.tagline":   "Diário da Gratidão",
+	"nav.today":       "Hoje",
+	"nav.register":    "Registrar",
+	"nav.memories":    "Memórias",
+	"nav.insights":    "Insights",
+	"layout.footer":   "Feito com carinho para a sua prática diária",
+	"layout.language": "Idioma",
 
 	// Greetings
 	"greeting.morning":   "Bom dia",

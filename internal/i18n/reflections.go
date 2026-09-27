@@ -31,7 +31,7 @@ var reflections = map[string][]Reflection{
 
 // ReflectionList returns the quotes available for a locale.
 func ReflectionList(locale string) []Reflection {
-	if list, ok := reflections[base(locale)]; ok {
+	if list, ok := reflections[Base(locale)]; ok {
 		return list
 	}
 	return reflections["en"]

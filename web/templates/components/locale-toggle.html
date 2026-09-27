@@ -1,0 +1,24 @@
+{{- /*
+  Segmented language switch. `current` is compared against the bare language
+  subtag ("pt"/"en") because the layout passes the full locale ("pt-BR").
+*/ -}}
+<div class="inline-flex items-center gap-0.5 rounded-full border border-espresso/[0.08] bg-linen/50 p-0.5" role="group" aria-label="{{ if .Label }}{{ .Label }}{{ else }}Idioma{{ end }}">
+  <form action="{{ if .Action }}{{ .Action }}{{ else }}/locale{{ end }}" method="post">
+    {{ csrfField $.CSRFToken }}
+    <input type="hidden" name="locale" value="en" />
+    <button
+      type="submit"
+      data-amarra-locale="en"
+      class="rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors {{ if eq .Current "en" }}bg-linen text-terracotta-deep shadow-soft{{ else }}text-clay hover:text-espresso{{ end }}"
+      {{- if eq .Current "en" }} aria-pressed="true"{{ end }}>EN</button>
+  </form>
+  <form action="{{ if .Action }}{{ .Action }}{{ else }}/locale{{ end }}" method="post">
+    {{ csrfField $.CSRFToken }}
+    <input type="hidden" name="locale" value="pt" />
+    <button
+      type="submit"
+      data-amarra-locale="pt"
+      class="rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors {{ if eq .Current "pt" }}bg-linen text-terracotta-deep shadow-soft{{ else }}text-clay hover:text-espresso{{ end }}"
+      {{- if eq .Current "pt" }} aria-pressed="true"{{ end }}>PT</button>
+  </form>
+</div>

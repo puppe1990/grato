@@ -45,7 +45,7 @@ func MonthYear(locale string, day time.Time) string {
 
 // WeekdayShort renders the three-letter weekday used in the week strip.
 func WeekdayShort(locale string, day time.Time) string {
-	names, ok := weekdayShortNames[base(locale)]
+	names, ok := weekdayShortNames[Base(locale)]
 	if !ok {
 		names = weekdayShortNames["en"]
 	}
@@ -78,7 +78,7 @@ func Greeting(locale string, at time.Time) string {
 }
 
 func weekdayName(locale string, day time.Time) string {
-	names, ok := weekdayNames[base(locale)]
+	names, ok := weekdayNames[Base(locale)]
 	if !ok {
 		names = weekdayNames["en"]
 	}
@@ -86,7 +86,7 @@ func weekdayName(locale string, day time.Time) string {
 }
 
 func monthName(locale string, day time.Time) string {
-	names, ok := monthNames[base(locale)]
+	names, ok := monthNames[Base(locale)]
 	if !ok {
 		names = monthNames["en"]
 	}
@@ -94,7 +94,7 @@ func monthName(locale string, day time.Time) string {
 }
 
 func monthTitle(locale string, day time.Time) string {
-	names, ok := monthTitleNames[base(locale)]
+	names, ok := monthTitleNames[Base(locale)]
 	if !ok {
 		names = monthTitleNames["en"]
 	}
@@ -102,11 +102,12 @@ func monthTitle(locale string, day time.Time) string {
 }
 
 func isPortuguese(locale string) bool {
-	return base(locale) == "pt"
+	return Base(locale) == "pt"
 }
 
-// base reduces "pt-BR" / "pt_BR" to "pt".
-func base(locale string) string {
+// Base reduces "pt-BR" / "pt_BR" to its language subtag ("pt"), which is what
+// the language toggle and the date vocabulary compare against.
+func Base(locale string) string {
 	lowered := strings.ToLower(strings.TrimSpace(locale))
 	if i := strings.IndexAny(lowered, "-_"); i > 0 {
 		return lowered[:i]

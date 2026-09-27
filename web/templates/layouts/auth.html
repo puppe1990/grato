@@ -37,7 +37,10 @@
         {{ template "content" . }}
       </main>
 
-      <footer class="px-5 pb-8 text-center text-[12px] text-clay">{{ t "layout.footer" }}</footer>
+      <footer class="flex flex-col items-center gap-4 px-5 pb-8 text-center text-[12px] text-clay">
+        <.locale-toggle current="{{ .LocaleBase }}" label="{{ t "layout.language" }}" />
+        <p>{{ t "layout.footer" }}</p>
+      </footer>
     </div>
 
     <div id="amarra-toast-host" aria-live="polite"></div>

@@ -2,12 +2,13 @@ package i18n
 
 var enMessages = map[string]string{
 	// Chrome
-	"brand.tagline": "Gratitude Journal",
-	"nav.today":     "Today",
-	"nav.register":  "Write",
-	"nav.memories":  "Memories",
-	"nav.insights":  "Insights",
-	"layout.footer": "Made with care for your daily practice",
+	"brand.tagline":   "Gratitude Journal",
+	"nav.today":       "Today",
+	"nav.register":    "Write",
+	"nav.memories":    "Memories",
+	"nav.insights":    "Insights",
+	"layout.footer":   "Made with care for your daily practice",
+	"layout.language": "Language",
 
 	// Greetings
 	"greeting.morning":   "Good morning",

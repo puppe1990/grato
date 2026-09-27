@@ -8,6 +8,8 @@ import (
 	"github.com/puppe1990/amarra-cais/pkg/cais"
 	"github.com/puppe1990/amarra-cais/pkg/cais/i18n"
 	"github.com/puppe1990/amarra-cais/pkg/cais/meta"
+
+	appi18n "github.com/puppe1990/grato/internal/i18n"
 )
 
 // Social card defaults. The image lives at the path the framework expects, so
@@ -31,11 +33,12 @@ func amarraData(r *http.Request, site meta.Site, fallback *i18n.Catalog, extra m
 	}
 
 	data := map[string]any{
-		"Site":      s,
-		"CSRFToken": s.CSRFToken,
-		"Flash":     s.Flash,
-		"Locale":    locale,
-		"Head":      previewHead(r, s, locale, extra),
+		"Site":       s,
+		"CSRFToken":  s.CSRFToken,
+		"Flash":      s.Flash,
+		"Locale":     locale,
+		"LocaleBase": appi18n.Base(locale),
+		"Head":       previewHead(r, s, locale, extra),
 	}
 	for k, v := range extra {
 		data[k] = v

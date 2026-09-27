@@ -63,10 +63,10 @@
             <a href="/memorias" class="hearth-rail-link {{ if eq .ActiveNav "memories" }}bg-linen text-terracotta-deep{{ else }}text-umber hover:bg-linen/60{{ end }}">{{ template "icon_book" . }}{{ t "nav.memories" }}</a>
             <a href="/insights" class="hearth-rail-link {{ if eq .ActiveNav "insights" }}bg-linen text-terracotta-deep{{ else }}text-umber hover:bg-linen/60{{ end }}">{{ template "icon_sprout" . }}{{ t "nav.insights" }}</a>
           </div>
-          <div class="mt-auto flex items-center justify-between gap-3 pt-6">
-            <.locale-toggle current="{{ .Locale }}" />
+          <div class="mt-auto space-y-3 pt-6">
+            <.locale-toggle current="{{ .LocaleBase }}" label="{{ t "layout.language" }}" />
             <.form action="/logout" method="post">
-              <.button type="submit" class="hearth-btn-ghost">{{ t "auth.logout" }}</.button>
+              <.button type="submit" class="hearth-rail-link w-full text-umber hover:bg-linen/60 hover:text-espresso">{{ t "auth.logout" }}</.button>
             </.form>
           </div>
         </aside>
@@ -96,6 +96,16 @@
           <main class="mx-auto w-full max-w-3xl flex-1 px-5 pb-32 pt-5 lg:pb-16">
             <.flash />
             {{ template "content" . }}
+
+            {{- /* The rail is hidden below lg, so the account row travels with the
+                   content: otherwise there is no way to sign out or switch
+                   language on a phone. */ -}}
+            <footer class="mt-10 flex items-center justify-between gap-4 border-t border-espresso/[0.06] pt-5 lg:hidden">
+              <.locale-toggle current="{{ .LocaleBase }}" label="{{ t "layout.language" }}" />
+              <.form action="/logout" method="post">
+                <.button type="submit" class="hearth-btn-ghost">{{ t "auth.logout" }}</.button>
+              </.form>
+            </footer>
           </main>
         </div>
       </div>
