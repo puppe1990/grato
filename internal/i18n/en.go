@@ -9,6 +9,7 @@ var enMessages = map[string]string{
 	"nav.insights":    "Insights",
 	"layout.footer":   "Made with care for your daily practice",
 	"layout.language": "Language",
+	"layout.back":     "Back",
 
 	// Greetings
 	"greeting.morning":   "Good morning",

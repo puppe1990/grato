@@ -47,7 +47,14 @@ func (h *AuthHandler) renderAuth(w http.ResponseWriter, r *http.Request, name st
 			extra["Description"] = description
 		}
 	}
-	writeView(w, r, h.views, h.cfg, "app", name, amarraData(r, h.site, h.catalog, extra), status)
+	// Sign-in is the door, so it has nowhere to go back to; the other public
+	// pages lead back to it.
+	if _, ok := extra["BackHref"]; !ok && name != "login" {
+		extra["BackHref"] = "/login"
+	}
+	// The public shell, not the diary chrome: these pages render before there
+	// is a session, so the rail would only offer links back to the door.
+	writeView(w, r, h.views, h.cfg, "auth", name, amarraData(r, h.site, h.catalog, extra), status)
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {

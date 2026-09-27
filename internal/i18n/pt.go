@@ -9,6 +9,7 @@ var ptMessages = map[string]string{
 	"nav.insights":    "Insights",
 	"layout.footer":   "Feito com carinho para a sua prática diária",
 	"layout.language": "Idioma",
+	"layout.back":     "Voltar",
 
 	// Greetings
 	"greeting.morning":   "Bom dia",
