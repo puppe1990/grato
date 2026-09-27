@@ -77,11 +77,34 @@
   }
 
   .hearth-nav-link {
-    @apply flex flex-col items-center gap-1 px-3 py-2 text-[11px] font-medium transition-colors;
+    @apply flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-[11px] font-medium transition-colors;
+  }
+
+  /* The current tab is driven by aria-current, which both the server render
+     and the nav hook set — so it survives a Drive morph. Colour alone was not
+     enough: the write button sits directly above its label, so an orange label
+     under an orange circle read as part of the button, not as "selected". */
+  .hearth-nav-link[aria-current="page"] {
+    @apply font-semibold text-terracotta;
+  }
+
+  /* The write button is a filled FAB only while its tab is current. An
+     always-filled circle looks selected on every screen, which is exactly the
+     signal a tab bar must not send. */
+  .hearth-nav-fab {
+    @apply grid h-12 w-12 place-items-center rounded-full bg-terracotta/[0.14] text-terracotta transition-colors;
+  }
+
+  .hearth-nav-link[aria-current="page"] .hearth-nav-fab {
+    @apply bg-terracotta text-linen shadow-float;
   }
 
   .hearth-rail-link {
-    @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors;
+    @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-umber transition-colors hover:bg-linen/60;
+  }
+
+  .hearth-rail-link[aria-current="page"] {
+    @apply bg-linen text-terracotta-deep;
   }
 
   .cais-password-wrap {
