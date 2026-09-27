@@ -91,21 +91,49 @@ func TestBottomNav_marksOnlyTheCurrentTab(t *testing.T) {
 }
 
 // The write button's fill is what marks its tab as current, so the rule that
-// turns aria-current into a filled circle has to exist.
+// turns aria-current into a filled circle has to exist, and the resting state
+// must not paint one.
 func TestStylesheet_fillsTheWriteButtonOnlyWhenCurrent(t *testing.T) {
 	source, err := os.ReadFile(filepath.Join(projectRoot(t), "input.css"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	css := string(source)
-	for _, want := range []string{
-		`.hearth-nav-fab {`,
-		`.hearth-nav-link[aria-current="page"] .hearth-nav-fab {`,
-	} {
-		if !strings.Contains(css, want) {
-			t.Errorf("input.css is missing %q", want)
+
+	resting, ok := cssBlock(css, ".hearth-nav-fab {")
+	if !ok {
+		t.Fatal("input.css has no .hearth-nav-fab rule")
+	}
+	if strings.Contains(resting, "bg-") {
+		t.Errorf("the resting write tab paints a badge the other tabs lack: %s", resting)
+	}
+	if !strings.Contains(resting, "h-5 w-5") {
+		t.Errorf("the resting write tab should be icon-sized, got: %s", resting)
+	}
+
+	current, ok := cssBlock(css, `.hearth-nav-link[aria-current="page"] .hearth-nav-fab {`)
+	if !ok {
+		t.Fatal("input.css is missing the current-tab rule for the write button")
+	}
+	for _, want := range []string{"bg-terracotta", "h-12 w-12"} {
+		if !strings.Contains(current, want) {
+			t.Errorf("the current write tab should be a filled button (%s), got: %s", want, current)
 		}
 	}
+}
+
+// cssBlock returns the declarations of the first rule with the given selector.
+func cssBlock(css, selector string) (string, bool) {
+	start := strings.Index(css, selector)
+	if start < 0 {
+		return "", false
+	}
+	open := strings.Index(css[start:], "{")
+	close := strings.Index(css[start:], "}")
+	if open < 0 || close < 0 || close < open {
+		return "", false
+	}
+	return css[start+open+1 : start+close], true
 }
 
 // The rendered write button must not carry a hardcoded fill: the fill is the

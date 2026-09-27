@@ -88,15 +88,16 @@
     @apply font-semibold text-terracotta;
   }
 
-  /* The write button is a filled FAB only while its tab is current. An
-     always-filled circle looks selected on every screen, which is exactly the
-     signal a tab bar must not send. */
+  /* Every tab is a plain icon above its label; only the current one changes.
+     The write tab is no exception: it grows into a filled, raised button only
+     while it is current, so no tab carries a badge the other three lack. The
+     item is bottom-aligned in the bar, so growing upward never moves a label. */
   .hearth-nav-fab {
-    @apply grid h-12 w-12 place-items-center rounded-full bg-terracotta/[0.14] text-terracotta transition-colors;
+    @apply grid h-5 w-5 place-items-center rounded-full text-clay transition-all duration-200;
   }
 
   .hearth-nav-link[aria-current="page"] .hearth-nav-fab {
-    @apply bg-terracotta text-linen shadow-float;
+    @apply h-12 w-12 bg-terracotta text-linen shadow-float;
   }
 
   .hearth-rail-link {
