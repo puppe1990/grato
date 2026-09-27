@@ -1,0 +1,17 @@
+bin/
+data/
+web/static/css/styles.css
+node_modules/
+tmp/
+.air/
+*.db
+.env
+.env.*
+!.env.example
+.DS_Store
+
+# Stitch design export used as the visual reference for the UI.
+.design-import/
+
+# Agent local state.
+.commandcode/

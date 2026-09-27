@@ -1,0 +1,53 @@
+{{ define "content" }}
+<section class="animate-hearth-fade space-y-7">
+  <div class="space-y-4 text-center">
+    <span class="mx-auto block h-16 w-16">{{ template "icon_flame" . }}</span>
+    <h2 class="font-serif text-[26px] leading-tight sm:text-[30px]">{{ t "auth.signup_heading" }}</h2>
+    <p class="mx-auto max-w-sm text-[15px] leading-relaxed text-umber">{{ t "auth.signup_subtitle" }}</p>
+  </div>
+
+  <form action="/signup" method="post" class="space-y-5">
+    {{ csrfField .CSRFToken }}
+    <.input name="name" label="{{ t "auth.name_label" }}" placeholder="{{ t "auth.name_placeholder" }}" value="{{ .Name }}" autocomplete="name" error="{{ fieldError .Errors "name" }}" />
+    <.input name="email" type="email" label="{{ t "auth.email_label" }}" placeholder="{{ t "auth.email_placeholder" }}" value="{{ .Email }}" autocomplete="email" error="{{ fieldError .Errors "email" }}" />
+    <.password name="password" label="{{ t "auth.password_new" }}" hint="{{ t "auth.password_hint" }}" autocomplete="new-password" required="required" error="{{ fieldError .Errors "password" }}" />
+    <.password name="password_confirmation" label="{{ t "auth.password_confirmation_label" }}" autocomplete="new-password" required="required" error="{{ fieldError .Errors "password_confirmation" }}" />
+
+    <fieldset class="hearth-card space-y-3 p-5">
+      <legend class="hearth-kicker">{{ t "auth.intention_label" }}</legend>
+      <p class="text-[13px] text-umber">{{ t "auth.intention_help" }}</p>
+      <div class="flex flex-wrap gap-2">
+        {{ range .Intentions }}
+        <label class="cursor-pointer">
+          <input type="radio" name="intention" value="{{ .Value }}" class="peer sr-only" {{ if eq $.Intention .Value }}checked{{ end }} />
+          <span class="hearth-chip inline-flex peer-checked:border-sage peer-checked:bg-sage peer-checked:text-linen">{{ .Label }}</span>
+        </label>
+        {{ end }}
+      </div>
+    </fieldset>
+
+    <label class="flex items-start gap-2.5 text-[12px] leading-relaxed text-umber">
+      <input type="checkbox" required class="mt-0.5 h-4 w-4 shrink-0 rounded border-espresso/20 accent-sage" />
+      <span>{{ t "auth.terms" }}</span>
+    </label>
+
+    <.button type="submit" class="hearth-btn-primary w-full">{{ t "auth.signup_submit" }}</.button>
+  </form>
+
+  <div class="flex items-center gap-3 text-[12px] text-clay">
+    <span class="h-px flex-1 bg-espresso/[0.08]"></span>
+    <span>{{ t "auth.or_continue" }}</span>
+    <span class="h-px flex-1 bg-espresso/[0.08]"></span>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3">
+    <span class="hearth-card flex items-center justify-center gap-2 p-3 text-[13px] font-semibold text-umber">Google</span>
+    <span class="hearth-card flex items-center justify-center gap-2 p-3 text-[13px] font-semibold text-umber">Apple</span>
+  </div>
+
+  <p class="text-center text-[14px] text-umber">
+    {{ t "auth.already_member" }}
+    <a href="/login" class="font-semibold text-terracotta">{{ t "auth.login_title" }}</a>
+  </p>
+</section>
+{{ end }}

@@ -1,0 +1,131 @@
+{{ define "content" }}
+<section class="animate-hearth-fade space-y-6">
+  <header class="space-y-2">
+    <p class="hearth-kicker text-sage">{{ t "register.kicker" }}</p>
+    <h1 class="font-serif text-[26px] leading-snug sm:text-[30px]">{{ .Prompt }}</h1>
+  </header>
+
+  <nav class="flex flex-wrap gap-2" aria-label="{{ t "nav.register" }}">
+    {{ range .Checkpoints }}
+    <a href="{{ .URL }}" class="hearth-chip {{ if .Active }}hearth-chip-active{{ end }}" aria-pressed="{{ if .Active }}true{{ else }}false{{ end }}">{{ .Label }}</a>
+    {{ end }}
+  </nav>
+
+  <form data-testid="register-form" action="/registrar" method="post" class="space-y-6">
+    {{ csrfField .CSRFToken }}
+    <input type="hidden" name="moment_of_day" value="{{ .Form.MomentOfDay }}" />
+
+    <div class="space-y-2">
+      <p class="hearth-kicker">{{ t "register.inspiration_label" }}</p>
+      <div class="flex flex-wrap gap-2">
+        {{ range .Bodies }}<span class="hearth-chip">{{ .Label }}</span>{{ end }}
+      </div>
+    </div>
+
+    <div class="hearth-card space-y-3 p-5">
+      <div class="flex items-center justify-between gap-3">
+        <span class="inline-flex items-center gap-2 text-[13px] font-semibold text-umber">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
+          {{ t "register.free_label" }}
+        </span>
+        <span class="text-[12px] text-clay" data-testid="register-counter"><span data-counter-number>{{ len .Form.Body }}</span> {{ t "register.chars_suffix" }}</span>
+      </div>
+      <.textarea name="body" placeholder="{{ t "register.placeholder" }}" rows="6" error="{{ fieldError .Errors "body" }}" class="hearth-input min-h-[10rem] resize-y text-[17px] leading-relaxed">{{ .Form.Body }}</.textarea>
+      <div class="flex flex-wrap items-center gap-4 text-[12px] text-clay">
+        <span class="inline-flex items-center gap-1.5">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z" /><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v3" /></svg>
+          {{ t "register.voice_note" }}
+        </span>
+        <span class="inline-flex items-center gap-1.5">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 118 0v4" /></svg>
+          {{ t "register.private" }}
+        </span>
+        <span class="inline-flex items-center gap-1.5 text-sage">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5" /></svg>
+          {{ t "register.draft" }}
+        </span>
+      </div>
+    </div>
+
+    <div class="hearth-card space-y-3 p-5">
+      <p class="hearth-kicker">{{ t "register.title_label" }}</p>
+      <.input name="title" placeholder="{{ t "register.title_placeholder" }}" value="{{ .Form.Title }}" />
+    </div>
+
+    <div class="hearth-card space-y-3 p-5">
+      <p class="hearth-kicker">{{ t "register.feeling_question" }}</p>
+      <div class="flex flex-wrap gap-2">
+        {{ range .Moods }}
+        <label class="hearth-chip cursor-pointer {{ if .Active }}hearth-chip-active{{ end }}">
+          <input type="radio" name="mood" value="{{ .Value }}" class="sr-only" {{ if .Active }}checked{{ end }} />
+          {{ .Label }}
+        </label>
+        {{ end }}
+      </div>
+      <div class="pt-2">
+        <div class="flex items-baseline justify-between text-[13px]">
+          <span class="font-semibold text-umber">{{ t "register.feeling_inner" }}</span>
+          <span class="text-clay">{{ t "register.serenity_label" }}</span>
+        </div>
+        <input
+          type="range"
+          name="serenity"
+          min="1"
+          max="{{ .SerenityMax }}"
+          step="1"
+          value="{{ .Serenity }}"
+          class="mt-3 w-full accent-terracotta"
+          aria-label="{{ t "register.serenity_label" }}"
+        />
+        <div class="mt-1 flex justify-between text-[12px] text-clay">
+          <span>{{ t "register.calm" }}</span>
+          <span>{{ t "register.balanced" }}</span>
+          <span>{{ t "register.radiant" }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hearth-card space-y-3 p-5">
+      <div class="flex items-baseline justify-between gap-3">
+        <p class="hearth-kicker">{{ t "register.resonance_label" }}</p>
+        <span class="text-[12px] text-clay">{{ t "register.resonance_hint" }}</span>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        {{ range .TagChoices }}
+        <label class="hearth-chip cursor-pointer {{ if .Active }}hearth-chip-terracotta{{ end }}">
+          <input type="checkbox" name="tags" value="{{ .Name }}" class="sr-only" {{ if .Active }}checked{{ end }} />
+          #{{ .Name }}
+        </label>
+        {{ end }}
+      </div>
+      <label class="block">
+        <span class="sr-only">{{ t "register.new_tag" }}</span>
+        <input name="new_tag" placeholder="+ {{ t "register.new_tag" }}" class="mt-1 w-full rounded-lg border border-dashed border-espresso/[0.12] bg-transparent px-3 py-2 text-[13px] text-umber placeholder:text-clay focus:border-terracotta/40 focus:outline-none" />
+      </label>
+    </div>
+
+    <div class="space-y-3">
+      <.button type="submit" class="hearth-btn-primary w-full">
+        {{ t "register.save" }}
+      </.button>
+      <p class="text-center text-[13px] text-clay">{{ t "register.save_draft" }}</p>
+    </div>
+  </form>
+</section>
+
+<script>
+  // Inline scripts re-run on every Drive morph into this page (#84): keep the
+  // listener on document behind a flag so it is registered exactly once and
+  // resolves the live textarea at input time.
+  (function () {
+    if (window.__gratoCounter) return;
+    window.__gratoCounter = true;
+    document.addEventListener("input", function (event) {
+      var el = event.target;
+      if (!el || !el.matches || !el.matches('textarea[name="body"]')) return;
+      var out = document.querySelector("[data-counter-number]");
+      if (out) out.textContent = String(el.value.length);
+    });
+  })();
+</script>
+{{ end }}

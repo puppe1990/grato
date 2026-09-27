@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans antialiased text-espresso bg-linen;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-serif font-medium text-espresso;
+  }
+
+  ::selection {
+    @apply bg-terracotta/25;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@layer components {
+  /* Tactile paper layering replaces drop shadows: a whisper-line border plus a
+     warm, ultra diffused ambient glow. */
+  .hearth-card {
+    @apply rounded-lg border border-espresso/[0.06] bg-parchment shadow-soft;
+  }
+
+  .hearth-card-raised {
+    @apply rounded-xl border border-espresso/[0.06] bg-linen shadow-float;
+  }
+
+  .hearth-kicker {
+    @apply font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-umber;
+  }
+
+  .hearth-quote {
+    @apply font-serif text-xl italic leading-relaxed text-espresso;
+  }
+
+  .hearth-divider {
+    @apply border-t border-espresso/[0.06];
+  }
+
+  .hearth-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-espresso/[0.08] bg-linen px-3 py-1.5 text-[13px] font-medium text-umber transition-colors;
+  }
+
+  .hearth-chip-active {
+    @apply border-sage bg-sage text-linen;
+  }
+
+  .hearth-chip-terracotta {
+    @apply border-terracotta bg-terracotta text-linen;
+  }
+
+  .hearth-input {
+    @apply w-full rounded-lg border border-espresso/[0.08] bg-parchment px-4 py-3 text-base text-espresso placeholder:text-clay focus:border-terracotta/40 focus:outline-none focus:ring-2 focus:ring-terracotta/20;
+  }
+
+  .hearth-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-terracotta px-7 py-3.5 text-base font-semibold text-linen shadow-float transition-colors hover:bg-terracotta-soft;
+  }
+
+  .hearth-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-umber transition-colors hover:text-espresso;
+  }
+
+  .hearth-nav-link {
+    @apply flex flex-col items-center gap-1 px-3 py-2 text-[11px] font-medium transition-colors;
+  }
+
+  .hearth-rail-link {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors;
+  }
+
+  .cais-password-wrap {
+    @apply relative;
+  }
+
+  .cais-password-toggle {
+    @apply absolute right-0 top-0 flex h-full items-center px-4 text-clay hover:text-espresso;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .cais-password-toggle svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .cais-toast-enter {
+    animation: cais-toast-in 200ms ease-out;
+  }
+
+  @keyframes cais-toast-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -0.75rem);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  .cais-skeleton {
+    @apply animate-pulse rounded-lg bg-sand;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-hearth-fade,
+    .animate-hearth-breathe {
+      animation: none;
+    }
+  }
+}

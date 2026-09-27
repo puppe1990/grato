@@ -1,0 +1,6 @@
+{{ if .Flash }}
+<div class="mb-4 flex items-start gap-2.5 rounded-lg border border-sage/25 bg-sage/10 px-4 py-3 text-[14px] text-sage" role="status">
+  <svg class="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5" /></svg>
+  <span>{{ with flashMessage .Flash }}{{ . }}{{ else }}{{ .Flash }}{{ end }}</span>
+</div>
+{{ end }}

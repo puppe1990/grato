@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" role="img" aria-label="Grato">
+  <rect width="512" height="512" rx="112" fill="#FAF7F2"/>
+  <g transform="translate(64 64) scale(3.84)">
+    <circle cx="50" cy="50" r="46" fill="#F4ECE1"/>
+    <path d="M50 22C43 32 30 42 30 54C30 65.0457 38.9543 74 50 74C61.0457 74 70 65.0457 70 54C70 42 57 32 50 22Z" fill="#D97746" fill-opacity="0.85"/>
+    <path d="M50 36C45 44 38 50 38 58C38 64.6274 43.3726 70 50 70C56.6274 70 62 64.6274 62 58C62 50 55 44 50 36Z" fill="#FAF7F2"/>
+    <circle cx="50" cy="58" r="5" fill="#5A7865"/>
+    <path d="M50 14V18M50 82V86M14 50H18M82 50H86" stroke="#D97746" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -1,0 +1,13 @@
+<div class="space-y-1.5">
+  {{ if .Label }}<label class="block text-[13px] font-semibold text-espresso" for="{{ .Name }}">{{ .Label }}</label>{{ end }}
+  <textarea
+    class="{{ if .Class }}{{ .Class }}{{ else }}hearth-input min-h-[9rem] resize-y leading-relaxed{{ end }}"
+    id="{{ .Name }}"
+    name="{{ .Name }}"
+    {{- if .Placeholder }} placeholder="{{ .Placeholder }}"{{ end }}
+    {{- if .Rows }} rows="{{ .Rows }}"{{ end }}
+    {{- if .Maxlength }} maxlength="{{ .Maxlength }}"{{ end }}
+    {{- if .Error }} aria-invalid="true"{{ end }}
+  >{{ .Inner }}</textarea>
+  {{ if .Error }}<p class="text-[13px] font-medium text-[#93000A]">{{ .Error }}</p>{{ end }}
+</div>

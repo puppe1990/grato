@@ -1,0 +1,104 @@
+{{ define "content" }}
+<section class="animate-hearth-fade space-y-6">
+  <header data-testid="today-greeting" class="space-y-1.5">
+    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-terracotta">{{ .FullDate }}</p>
+    <h1 class="font-serif text-[28px] leading-tight sm:text-[34px]">{{ .Greeting }}, {{ .UserName }}</h1>
+    <p class="text-[15px] text-umber">{{ t "today.moments_hint" }}</p>
+  </header>
+
+  <article data-testid="today-reflection" class="hearth-card relative overflow-hidden p-5">
+    <div class="pointer-events-none absolute -right-4 -top-6 font-serif text-[9rem] leading-none text-terracotta/[0.07]" aria-hidden="true">”</div>
+    <div class="flex items-center gap-2">
+      <svg class="h-4 w-4 text-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" /></svg>
+      <p class="hearth-kicker">{{ t "today.reflection_label" }}</p>
+    </div>
+    <blockquote class="hearth-quote relative mt-3">{{ .Reflection.Text }}</blockquote>
+    {{ if .Reflection.Author }}<figcaption class="mt-2 text-[13px] text-clay">— {{ .Reflection.Author }}</figcaption>{{ end }}
+    <div class="mt-4 flex items-center gap-2 text-clay">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 10-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 000-7.8z" /></svg>
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7" /><path d="M16 6l-4-4-4 4M12 2v13" /></svg>
+    </div>
+  </article>
+
+  <section class="hearth-card p-5">
+    <div class="flex items-baseline justify-between gap-3">
+      <h2 class="text-[15px] font-semibold">{{ t "today.how_are_you" }}</h2>
+      <span class="text-[12px] text-clay">{{ t "today.tap_to_change" }}</span>
+    </div>
+    <div class="mt-3 flex flex-wrap gap-2">
+      {{ range .Moods }}
+      <a href="{{ .URL }}" class="hearth-chip {{ if .Active }}hearth-chip-active{{ end }}" aria-pressed="{{ if .Active }}true{{ else }}false{{ end }}">{{ .Label }}</a>
+      {{ end }}
+    </div>
+  </section>
+
+  <section class="space-y-3">
+    <div class="flex items-baseline justify-between gap-3">
+      <h2 class="font-serif text-[20px]">{{ t "today.moments_title" .Total }}</h2>
+      <span class="rounded-full bg-sage/10 px-3 py-1 text-[12px] font-semibold text-sage">{{ .Filled }}/{{ .Total }}</span>
+    </div>
+
+    {{ range .Checkpoints }}
+    <article data-testid="today-checkpoint" data-filled="{{ if .Filled }}true{{ else }}false{{ end }}" class="hearth-card p-4">
+      {{ if .Filled }}
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-sage text-linen">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5" /></svg>
+        </span>
+        <span class="text-[13px] font-semibold">{{ .Time }}</span>
+        <span class="text-clay">·</span>
+        <span class="text-[13px] text-umber">{{ .Label }}</span>
+        {{ range .Tags }}<span class="ml-auto text-[12px] text-sage">#{{ .Name }}</span>{{ end }}
+      </div>
+      {{ if .Moment.Title }}<h3 class="mt-2.5 font-serif text-[17px]">{{ .Moment.Title }}</h3>{{ end }}
+      <p class="mt-1.5 whitespace-pre-line text-[15px] leading-relaxed text-espresso/90">{{ .Moment.Body }}</p>
+      {{ else }}
+      <a href="{{ .URL }}" class="flex items-center gap-3">
+        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-terracotta/10 text-terracotta">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        </span>
+        <span class="min-w-0">
+          <span class="block text-[15px] font-semibold">{{ .Label }}</span>
+          <span class="block truncate text-[13px] text-clay">{{ .Prompt }}</span>
+        </span>
+        <svg class="ml-auto h-4 w-4 shrink-0 text-clay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+      </a>
+      {{ end }}
+    </article>
+    {{ end }}
+  </section>
+
+  {{ if .StreakDays }}
+  <article data-testid="today-streak" class="hearth-card flex items-center gap-4 bg-terracotta/[0.07] p-5">
+    <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-terracotta/15 text-terracotta">{{ template "icon_streak" . }}</span>
+    <div class="min-w-0">
+      <h2 class="font-serif text-[18px]">{{ t "today.streak_title" .StreakDays }}</h2>
+      <p class="mt-1 text-[14px] leading-relaxed text-umber">{{ t "today.streak_body" }}</p>
+    </div>
+  </article>
+  {{ end }}
+
+  <article class="hearth-card flex items-center gap-4 p-5">
+    <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-sage/10 text-sage animate-hearth-breathe">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 8v4M12 16h.01" /></svg>
+    </span>
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center justify-between gap-2">
+        <p class="hearth-kicker text-sage">{{ t "today.pause_label" }}</p>
+        <span class="text-[12px] text-clay">{{ t "today.pause_duration" }}</span>
+      </div>
+      <h2 class="mt-1 font-serif text-[18px]">{{ t "today.pause_title" }}</h2>
+      <p class="mt-1 text-[14px] text-umber">{{ t "today.pause_body" }}</p>
+    </div>
+    <a href="/registrar" class="hidden shrink-0 rounded-full bg-sage px-5 py-2.5 text-[13px] font-semibold text-linen sm:inline-block">{{ t "today.pause_cta" }}</a>
+  </article>
+
+  <article class="relative overflow-hidden rounded-xl border border-espresso/[0.06]">
+    <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(201,154,69,0.9),rgba(90,120,101,0.92))]"></div>
+    <div class="relative flex min-h-[9rem] flex-col justify-end p-5 text-linen">
+      <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-linen/80">{{ t "today.inspiration_label" }}</p>
+      <h2 class="mt-1 font-serif text-[22px] text-linen">{{ t "today.inspiration_title" }}</h2>
+    </div>
+  </article>
+</section>
+{{ end }}

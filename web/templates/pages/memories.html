@@ -1,0 +1,110 @@
+{{ define "content" }}
+<section class="animate-hearth-fade space-y-6">
+  <header class="space-y-1.5">
+    <p class="hearth-kicker text-sage">{{ t "memories.kicker" }}</p>
+    <h1 data-testid="memories-count" class="font-serif text-[26px] leading-snug sm:text-[30px]">{{ t "memories.title" .Total }}</h1>
+    <p class="text-[15px] text-umber">{{ t "memories.subtitle" }}</p>
+  </header>
+
+  <section class="hearth-card p-5">
+    <div class="flex items-center justify-between gap-3">
+      <span class="inline-flex items-center gap-2 text-[13px] font-semibold text-umber">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
+        {{ .MonthLabel }}
+      </span>
+      <span class="rounded-full bg-sage/10 px-3 py-1 text-[12px] font-semibold text-sage">{{ t "memories.marked" .MarkedCount }}</span>
+    </div>
+
+    <div class="mt-4 grid grid-cols-7 gap-1 text-center">
+      {{ range .Weekdays }}<span class="pb-1 text-[11px] font-semibold uppercase tracking-wide text-clay">{{ . }}</span>{{ end }}
+      {{ range .Calendar }}
+      {{ if .Other }}<span aria-hidden="true"></span>
+      {{ else }}
+      <span
+        {{ if .Marked }}data-testid="memories-day-marked"{{ end }}
+        class="grid aspect-square place-items-center rounded-lg text-[13px] {{ if .IsToday }}bg-terracotta font-semibold text-linen{{ else if .Marked }}bg-sage/15 font-medium text-sage{{ else }}text-clay{{ end }}"
+      >{{ .Number }}</span>
+      {{ end }}
+      {{ end }}
+    </div>
+  </section>
+
+  {{ if .Filters }}
+  <div class="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5">
+    {{ range .Filters }}
+    <a href="/memorias{{ if .Value }}?tag={{ .Value }}{{ end }}" class="hearth-chip shrink-0 {{ if .Active }}hearth-chip-active{{ end }}">{{ .Name }}</a>
+    {{ end }}
+  </div>
+  {{ end }}
+
+  {{ if .Featured }}
+  <section class="space-y-2">
+    <p class="hearth-kicker">{{ t "memories.featured_label" }}</p>
+    <article class="hearth-card-raised p-5">
+      <div class="flex items-center gap-2 text-[12px] text-clay">
+        <span class="inline-flex items-center gap-1.5">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+          {{ .FeaturedLabel }}
+        </span>
+        <span>·</span>
+        <span>{{ .FeaturedLabel }}</span>
+      </div>
+      {{ if .Featured.Title }}<h2 class="mt-2 font-serif text-[20px]">{{ .Featured.Title }}</h2>{{ end }}
+      <p class="mt-2 whitespace-pre-line text-[15px] leading-relaxed text-espresso/90">{{ .Featured.Body }}</p>
+      <div class="mt-4 flex items-center gap-2 text-[13px] font-semibold text-terracotta-deep">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 10-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 000-7.8z" /></svg>
+        {{ t "memories.featured_cta" }}
+      </div>
+    </article>
+  </section>
+  {{ end }}
+
+  <section class="space-y-3">
+    <div class="flex items-baseline justify-between gap-3">
+      <h2 class="font-serif text-[20px]">{{ t "memories.timeline" }}</h2>
+      <span class="text-[12px] text-clay">{{ t "memories.most_recent" }}</span>
+    </div>
+
+    {{ if .HasEntries }}
+    {{ range .Entries }}
+    <article data-testid="memories-entry" class="hearth-card space-y-2.5 p-5">
+      <div class="flex flex-wrap items-center gap-2 text-[12px]">
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-sage/10 px-2.5 py-1 font-semibold text-sage">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 8a4 4 0 000 8" /></svg>
+          {{ .MoodLabel }}
+        </span>
+        <span class="text-umber">{{ .DayLabel }}</span>
+        <span class="text-clay">·</span>
+        <span class="text-clay">{{ .TimeLabel }}</span>
+      </div>
+
+      {{ range .Tags }}<span class="mr-1 text-[12px] font-medium text-terracotta">#{{ .Name }}</span>{{ end }}
+
+      {{ if .Moment.Title }}<h3 class="font-serif text-[18px]">{{ .Moment.Title }}</h3>{{ end }}
+      <p class="whitespace-pre-line text-[15px] leading-relaxed text-espresso/90">{{ .Moment.Body }}</p>
+
+      <div class="flex flex-wrap items-center gap-4 pt-1 text-[12px] text-clay">
+        <span class="inline-flex items-center gap-1.5 font-semibold text-terracotta-deep">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
+          {{ t "memories.reopen" }}
+        </span>
+        <span class="inline-flex items-center gap-1.5">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+          {{ t "memories.reading_time" .ReadingTime }}
+        </span>
+      </div>
+    </article>
+    {{ end }}
+    {{ else }}
+    <div data-testid="memories-empty" class="rounded-lg border border-dashed border-espresso/[0.12] px-6 py-10 text-center">
+      <p class="font-serif text-[18px]">{{ t "memories.empty_title" }}</p>
+      <p class="mt-2 text-[14px] text-umber">{{ t "memories.empty_body" }}</p>
+      <a href="/registrar" class="hearth-btn-primary mt-5">{{ t "nav.register" }}</a>
+    </div>
+    {{ end }}
+  </section>
+
+  <p class="pt-2 text-center font-serif text-[17px] italic text-umber">“{{ t "today.inspiration_title" }}”</p>
+  <p class="pb-2 text-center text-[12px] text-clay">{{ t "memories.closing_by" }}</p>
+</section>
+{{ end }}

@@ -1,0 +1,4 @@
+<button
+  type="{{ if .Type }}{{ .Type }}{{ else }}button{{ end }}"
+  class="{{ if .Class }}{{ .Class }}{{ else }}hearth-btn-primary w-full{{ end }}"
+  {{- if .Click }} amarra-click="{{ .Click }}"{{ end }}>{{ .Inner }}</button>

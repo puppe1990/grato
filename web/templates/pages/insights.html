@@ -1,0 +1,176 @@
+{{ define "content" }}
+<section class="animate-hearth-fade space-y-6">
+  <header class="space-y-1.5">
+    <p class="hearth-kicker text-sage">{{ t "insights.kicker" }}</p>
+    <h1 class="font-serif text-[26px] leading-snug sm:text-[30px]">{{ t "insights.title" }}</h1>
+    <p class="text-[15px] text-umber">{{ t "insights.subtitle" }}</p>
+  </header>
+
+  <article class="hearth-card p-5">
+    <div class="flex items-center justify-between gap-3">
+      <span class="rounded-full bg-terracotta/10 px-3 py-1 text-[12px] font-semibold text-terracotta-deep">{{ .MonthLabel }}</span>
+      <span class="text-[12px] text-clay">{{ .Predominant }}</span>
+    </div>
+    <blockquote class="hearth-quote mt-3">{{ t "insights.summary_quote" .MonthDays }}</blockquote>
+    <p class="mt-2 text-[14px] text-umber">{{ t "insights.summary_body" }}</p>
+    <div class="mt-4 flex items-center justify-between gap-3 text-[13px]">
+      <span class="font-semibold text-sage">{{ t "insights.summary_calm" (t "insights.calm_steady") }}</span>
+      <span class="text-clay">{{ t "insights.share" }}</span>
+    </div>
+  </article>
+
+  <section data-testid="insights-stats" class="grid grid-cols-3 gap-3">
+    <div data-testid="insights-streak" class="hearth-card p-4 text-center">
+      <p class="font-serif text-[26px] leading-none text-terracotta">{{ .Stats.CurrentStreak }}</p>
+      <p class="mt-1.5 text-[12px] font-semibold text-umber">{{ t "insights.stat_streak" }}</p>
+      <p class="text-[11px] text-clay">{{ t "insights.stat_streak_body" }}</p>
+    </div>
+    <div class="hearth-card p-4 text-center">
+      <p class="font-serif text-[26px] leading-none text-sage">{{ .Stats.TotalMoments }}</p>
+      <p class="mt-1.5 text-[12px] font-semibold text-umber">{{ t "insights.stat_thanks" }}</p>
+      <p class="text-[11px] text-clay">{{ t "insights.stat_thanks_body" }}</p>
+    </div>
+    <div class="hearth-card p-4 text-center">
+      <p class="font-serif text-[26px] leading-none text-gold">{{ .Stats.DaysThisYear }}</p>
+      <p class="mt-1.5 text-[12px] font-semibold text-umber">{{ t "insights.stat_days" }}</p>
+      <p class="text-[11px] text-clay">{{ t "insights.stat_days_body" .Stats.Year }}</p>
+    </div>
+  </section>
+
+  <section class="hearth-card space-y-3 p-5">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <h2 class="font-serif text-[19px]">{{ t "insights.serenity_title" }}</h2>
+        <p class="mt-0.5 text-[13px] text-clay">{{ t "insights.serenity_subtitle" }}</p>
+      </div>
+      {{ if .HasChart }}
+      <span class="shrink-0 rounded-full bg-sage/10 px-3 py-1 text-[12px] font-semibold text-sage">{{ t "insights.serenity_delta" .SerenityDelta }}</span>
+      {{ end }}
+    </div>
+
+    {{ if .HasChart }}
+    <svg data-testid="insights-serenity" viewBox="0 0 320 120" class="h-32 w-full" role="img" aria-label="{{ t "insights.serenity_title" }}">
+      <defs>
+        <linearGradient id="serenity-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#5A7865" stop-opacity="0.28" />
+          <stop offset="100%" stop-color="#5A7865" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+      <path d="{{ .Chart.Area }}" fill="url(#serenity-fill)" />
+      <path d="{{ .Chart.Path }}" fill="none" stroke="#5A7865" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+      {{ range .Chart.Points }}
+      <circle cx="{{ .X }}" cy="{{ .Y }}" r="3" fill="#5A7865"><title>{{ .Day }} · {{ .Serene }}/5</title></circle>
+      {{ end }}
+    </svg>
+    <div class="flex justify-between text-[11px] text-clay">
+      <span>{{ .Chart.FirstLabel }}</span>
+      <span>{{ .Chart.LastLabel }}</span>
+    </div>
+    {{ else }}
+    <p data-testid="insights-empty" class="rounded-lg border border-dashed border-espresso/[0.12] px-4 py-6 text-center text-[13px] text-umber">{{ t "insights.serenity_empty" }}</p>
+    {{ end }}
+  </section>
+
+  <section class="hearth-card space-y-3 p-5">
+    <div>
+      <h2 class="font-serif text-[19px]">{{ t "insights.themes_title" }}</h2>
+      <p class="mt-0.5 text-[13px] text-clay">{{ t "insights.themes_subtitle" }}</p>
+    </div>
+
+    {{ if .HasThemes }}
+    <ul class="space-y-3">
+      {{ range .Themes }}
+      <li data-testid="insights-theme" class="space-y-1.5">
+        <div class="flex items-baseline justify-between gap-3 text-[13px]">
+          <a href="/memorias?tag={{ .Slug }}" class="font-semibold text-umber">#{{ .Name }}</a>
+          <span class="text-clay">{{ .Count }}</span>
+        </div>
+        <div class="h-2 overflow-hidden rounded-full bg-sand">
+          <div class="h-full rounded-full bg-terracotta/70" style="width: {{ .Percent }}%"></div>
+        </div>
+      </li>
+      {{ end }}
+    </ul>
+    {{ else }}
+    <p data-testid="insights-empty" class="rounded-lg border border-dashed border-espresso/[0.12] px-4 py-6 text-center text-[13px] text-umber">{{ t "insights.themes_empty" }}</p>
+    {{ end }}
+  </section>
+
+  {{ if .MarkedMemory }}
+  <article class="relative overflow-hidden rounded-xl border border-espresso/[0.06]">
+    <div class="absolute inset-0 bg-[linear-gradient(120deg,rgba(43,38,35,0.72),rgba(90,120,101,0.78))]"></div>
+    <div class="relative space-y-2 p-5 text-linen">
+      <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-linen/75">{{ t "insights.marked_memory" }}</p>
+      <p class="font-serif text-[18px] italic leading-relaxed text-linen">{{ .MarkedMemory.Title }}</p>
+      <p class="text-[13px] text-linen/80">{{ t "insights.recalled" .Stats.LongestStreak }}</p>
+    </div>
+  </article>
+  {{ end }}
+
+  <section class="space-y-3">
+    <div class="flex items-baseline justify-between gap-3">
+      <div>
+        <h2 class="font-serif text-[19px]">{{ t "insights.milestones_title" }}</h2>
+        <p class="mt-0.5 text-[13px] text-clay">{{ t "insights.milestones_subtitle" }}</p>
+      </div>
+      <span class="shrink-0 rounded-full bg-gold/15 px-3 py-1 text-[12px] font-semibold text-gold">{{ t "insights.milestones_badge" .Unlocked }}</span>
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-3">
+      {{ range .Milestones }}
+      <article data-testid="insights-milestone" class="hearth-card p-4 {{ if .Reached }}bg-sage/5{{ end }}">
+        <span class="grid h-9 w-9 place-items-center rounded-full {{ if .Reached }}bg-sage text-linen{{ else }}bg-sand text-clay{{ end }}">
+          {{ if eq .Key "semana_completa" }}
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5" /></svg>
+          {{ else if eq .Key "olhar_noturno" }}
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" /></svg>
+          {{ else }}
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3z" /></svg>
+          {{ end }}
+        </span>
+        <h3 class="mt-2.5 text-[14px] font-semibold">{{ .Title }}</h3>
+        <p class="mt-0.5 text-[12px] text-clay">{{ .Body }}</p>
+        <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-sand">
+          <div class="h-full rounded-full {{ if .Reached }}bg-sage{{ else }}bg-terracotta/60{{ end }}" style="width: {{ .Percent }}%"></div>
+        </div>
+      </article>
+      {{ end }}
+    </div>
+  </section>
+
+  <section data-testid="insights-ritual" class="hearth-card space-y-4 p-5">
+    <div class="flex items-start justify-between gap-3">
+      <div class="flex items-start gap-3">
+        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-terracotta/10 text-terracotta">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9z" /><path d="M13.7 21a2 2 0 01-3.4 0" /></svg>
+        </span>
+        <div>
+          <h2 class="font-serif text-[18px]">{{ t "insights.ritual_title" }}</h2>
+          <p class="text-[13px] text-clay">{{ t "insights.ritual_body" }}</p>
+        </div>
+      </div>
+      <form action="/insights/ritual" method="post" class="flex shrink-0 items-center gap-2">
+        {{ csrfField .CSRFToken }}
+        <label class="relative inline-flex cursor-pointer items-center">
+          <input type="checkbox" name="enabled" value="1" class="peer sr-only" {{ if .Ritual.Enabled }}checked{{ end }} />
+          <span class="h-6 w-11 rounded-full bg-sand transition-colors peer-checked:bg-sage" aria-hidden="true"></span>
+          <span class="absolute left-0.5 h-5 w-5 rounded-full bg-linen shadow-soft transition-transform peer-checked:translate-x-5" aria-hidden="true"></span>
+          <span class="sr-only">{{ t "insights.ritual_title" }}</span>
+        </label>
+        <input type="time" name="remind_at" value="{{ .Ritual.RemindAt }}" class="rounded-lg border border-espresso/[0.08] bg-parchment px-2.5 py-1.5 text-[13px] text-espresso focus:outline-none" aria-label="{{ t "insights.ritual_schedule" }}" />
+        <button type="submit" class="rounded-full bg-sage px-4 py-1.5 text-[12px] font-semibold text-linen">{{ t "nav.today" }}</button>
+      </form>
+    </div>
+    <p class="border-t border-espresso/[0.06] pt-3 text-[13px] italic text-umber">{{ t "insights.ritual_quote" }}</p>
+  </section>
+
+  <section class="hearth-card space-y-3 bg-sage/5 p-5 text-center">
+    <span class="mx-auto grid h-10 w-10 place-items-center rounded-full bg-sage/15 text-sage">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a4 4 0 018-1 4 4 0 018 1c0 5.5-7 10-7 10z" /></svg>
+    </span>
+    <h2 class="font-serif text-[19px]">{{ t "insights.psy_title" }}</h2>
+    <p class="text-[14px] leading-relaxed text-umber">{{ t "insights.psy_body" }}</p>
+    <a href="/registrar" class="hearth-btn-primary mt-1">{{ t "insights.psy_cta" }}</a>
+  </section>
+</section>
+{{ end }}

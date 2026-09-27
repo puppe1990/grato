@@ -1,0 +1,8 @@
+{{ define "content" }}
+<section class="animate-hearth-fade flex min-h-[60vh] flex-col items-center justify-center space-y-5 text-center">
+  <span class="block h-16 w-16 opacity-70">{{ template "icon_flame" . }}</span>
+  <h2 class="font-serif text-[24px] leading-tight">{{ t "error.not_found_title" }}</h2>
+  <p class="mx-auto max-w-sm text-[15px] leading-relaxed text-umber">{{ t "error.not_found_body" }}</p>
+  <a href="/" class="hearth-btn-primary">{{ t "error.not_found_cta" }}</a>
+</section>
+{{ end }}

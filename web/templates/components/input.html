@@ -1,0 +1,19 @@
+<div class="space-y-1.5">
+  {{ if .Label }}<label class="block text-[13px] font-semibold text-espresso" for="{{ .Name }}">{{ .Label }}</label>{{ end }}
+  <input
+    class="hearth-input"
+    id="{{ .Name }}"
+    name="{{ .Name }}"
+    type="{{ if .Type }}{{ .Type }}{{ else }}text{{ end }}"
+    {{- if .Placeholder }} placeholder="{{ .Placeholder }}"{{ end }}
+    {{- if .Autocomplete }} autocomplete="{{ .Autocomplete }}"{{ end }}
+    {{- if .Inputmode }} inputmode="{{ .Inputmode }}"{{ end }}
+    {{- if .Min }} min="{{ .Min }}"{{ end }}
+    {{- if .Max }} max="{{ .Max }}"{{ end }}
+    {{- if eq .Nostore "true" }}{{ else }}{{ if eq .Type "file" }}{{ else }} value="{{ .Value }}"{{ end }}{{ end }}
+    {{- if .Accept }} accept="{{ .Accept }}"{{ end }}
+    {{- if .Required }} required{{ end }}
+    {{- if .Error }} aria-invalid="true"{{ end }}
+  >
+  {{ if .Error }}<p class="text-[13px] font-medium text-[#93000A]">{{ .Error }}</p>{{ end }}
+</div>

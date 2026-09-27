@@ -1,0 +1,52 @@
+{{ define "content" }}
+<section class="animate-hearth-fade space-y-7">
+  <div class="space-y-4 text-center">
+    <span class="mx-auto block h-16 w-16">{{ template "icon_flame" . }}</span>
+    <h2 class="font-serif text-[26px] leading-tight sm:text-[30px]">{{ t "auth.login_welcome" }}</h2>
+    <p class="mx-auto max-w-sm text-[15px] leading-relaxed text-umber">{{ t "auth.login_subtitle" }}</p>
+  </div>
+
+  <form action="/login" method="post" class="space-y-5">
+    {{ csrfField .CSRFToken }}
+    <.input name="email" type="email" label="{{ t "auth.email_label" }}" placeholder="{{ t "auth.email_placeholder" }}" value="{{ .Email }}" autocomplete="email" error="{{ fieldError .Errors "email" }}" />
+    <div class="space-y-1.5">
+      <div class="flex items-baseline justify-between gap-3">
+        <label class="text-[13px] font-semibold text-espresso" for="password">{{ t "auth.password_label" }}</label>
+        <a href="/forgot-password" class="text-[12px] font-medium text-terracotta">{{ t "auth.forgot_password" }}</a>
+      </div>
+      <.password name="password" autocomplete="current-password" required="required" error="{{ fieldError .Errors "password" }}" />
+    </div>
+    <.button type="submit" class="hearth-btn-primary w-full">{{ t "auth.login_submit" }}</.button>
+  </form>
+
+  <div class="flex items-center gap-3 text-[12px] text-clay">
+    <span class="h-px flex-1 bg-espresso/[0.08]"></span>
+    <span>{{ t "auth.or_continue" }}</span>
+    <span class="h-px flex-1 bg-espresso/[0.08]"></span>
+  </div>
+
+  <div class="hearth-card flex items-center gap-3 p-4">
+    <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-sage/12 text-sage">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 11c0 3-2 4-4 4a4 4 0 010-8c3 0 5 2 8 2" /><path d="M12 11c0 3 2 4 4 4a4 4 0 000-8c-3 0-5 2-8 2" /><path d="M12 11v6" /></svg>
+    </span>
+    <span class="min-w-0">
+      <span class="block text-[14px] font-semibold">{{ t "auth.biometry" }}</span>
+      <span class="block text-[12px] text-clay">{{ t "auth.biometry_hint" }}</span>
+    </span>
+  </div>
+
+  <div class="space-y-4 text-center">
+    <p class="text-[14px] text-umber">
+      {{ t "auth.no_account" }}
+      <a href="/signup" class="block font-semibold text-terracotta">{{ t "auth.signup_title" }}</a>
+    </p>
+    <div class="hearth-card space-y-1 p-4 text-left">
+      <p class="inline-flex items-center gap-2 text-[13px] font-semibold text-umber">
+        <svg class="h-4 w-4 text-sage" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 118 0v4" /></svg>
+        {{ t "auth.privacy_title" }}
+      </p>
+      <p class="text-[12px] leading-relaxed text-clay">{{ t "auth.privacy_body" }}</p>
+    </div>
+  </div>
+</section>
+{{ end }}

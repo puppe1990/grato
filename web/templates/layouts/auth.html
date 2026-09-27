@@ -1,0 +1,72 @@
+{{ define "auth" }}
+<!doctype html>
+<html lang="{{ htmlLang }}" data-amarra-layout="auth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    {{ if .CSRFToken }}<meta name="csrf-token" content="{{ .CSRFToken }}" />{{ end }}
+    <title>{{ if .Title }}{{ .Title }} · Grato{{ else }}Grato · Diário da Gratidão{{ end }}</title>
+    <meta name="description" content="Um diário de gratidão calmo e privado." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Grato" />
+    <meta property="og:title" content="{{ if .Title }}{{ .Title }}{{ else }}Grato{{ end }}" />
+    <meta property="og:image" content="{{ absURL .Site.AppURL "/static/og.png" }}" />
+    <meta property="og:locale" content="{{ ogLocale }}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/styles.css" />
+    <link rel="manifest" href="/static/manifest.webmanifest" />
+    <meta name="theme-color" content="#FAF7F2" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Grato" />
+    <link rel="apple-touch-icon" href="/static/icons/icon.png" />
+    <link rel="icon" href="/static/icons/icon.png" type="image/png" />
+    <script src="/static/js/amarra.js" defer></script>
+  </head>
+  <body class="min-h-screen bg-linen font-sans text-espresso">
+    <div id="amarra-main" class="flex min-h-screen flex-col">
+      <header class="sticky top-0 z-40 border-b border-espresso/[0.06] bg-linen/85 backdrop-blur-md">
+        <div class="mx-auto flex max-w-3xl items-center gap-3 px-5 py-3">
+          <a href="/login" class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-umber transition-colors hover:bg-parchment" aria-label="{{ t "nav.today" }}">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5" /><path d="M12 19l-7-7 7-7" /></svg>
+          </a>
+          <span class="h-8 w-8 shrink-0">{{ template "icon_flame" . }}</span>
+          <h1 class="font-serif text-lg leading-none">{{ .Title }}</h1>
+        </div>
+      </header>
+
+      <main class="mx-auto w-full max-w-md flex-1 px-5 pb-16 pt-6">
+        <.flash />
+        {{ template "content" . }}
+      </main>
+
+      <footer class="px-5 pb-8 text-center text-[12px] text-clay">{{ t "layout.footer" }}</footer>
+    </div>
+
+    <div id="amarra-toast-host" aria-live="polite"></div>
+    {{ if eq .Site.Env "development" }}
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          regs.forEach(function (r) { r.unregister(); });
+        });
+        if ("caches" in window) {
+          caches.keys().then(function (keys) {
+            keys.forEach(function (k) { caches.delete(k); });
+          });
+        }
+      }
+    </script>
+    {{ else }}
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/static/js/sw.js");
+      }
+    </script>
+    {{ end }}
+  </body>
+</html>
+{{ end }}
