@@ -62,7 +62,7 @@ func (h *DiaryHandler) currentUser(w http.ResponseWriter, r *http.Request) (mode
 }
 
 func (h *DiaryHandler) render(w http.ResponseWriter, r *http.Request, user *models.User, name string, extra map[string]any, status int) {
-	data := amarraData(r, h.site, extra)
+	data := amarraData(r, h.site, h.catalog, extra)
 	if user != nil {
 		h.addHeaderData(data, *user)
 	}

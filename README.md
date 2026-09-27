@@ -68,6 +68,7 @@ internal/testdata/     seeded faker builders shared by every test package
 internal/i18n/         pt/en copy + locale-aware date formatting
 web/templates/         layouts/ + pages/ + restyled kit components
 web/static/            Tailwind CSS, amarra.js, PWA (icons, manifest, service worker)
+design/                social card sources: og.svg + the phone capture it embeds
 ```
 
 Two decisions worth knowing:
@@ -99,19 +100,47 @@ make ci                 # test + lint + format-check
 The i18n key-parity test exists because a missing key renders as the raw key
 into the page — which is exactly how `nav.register` once leaked into the layout.
 
-## PWA
+## PWA and social cards
 
-Icons and the OG image are generated from the design's flame mark, which is
-kept as vector source next to the raster output:
+Icons and the social card are generated from the design's flame mark. The
+vector sources live next to the raster output for the icons, and in `design/`
+for the card — `design/` holds the composition plus the phone screenshot it
+embeds, so nothing that only feeds a build step ends up served publicly:
 
 ```bash
+# PWA icons
 rsvg-convert -w 512 -h 512 web/static/icons/icon.svg -o web/static/icons/icon-512.png
-rsvg-convert -w 1200 -h 630 web/static/og.svg -o web/static/og.png
+rsvg-convert -w 192 -h 192 web/static/icons/icon.svg -o web/static/icons/icon-192.png
+rsvg-convert -w 180 -h 180 web/static/icons/icon.svg -o web/static/icons/icon.png
+rsvg-convert -w 512 -h 512 web/static/icons/icon-maskable.svg -o web/static/icons/icon-512-maskable.png
+
+# Open Graph card (1200x630) — embeds design/og-phone.png
+rsvg-convert -w 1200 -h 630 design/og.svg -o web/static/og.png
 ```
 
 `icon-maskable.svg` bleeds its plate to the edges and keeps the mark inside
 the inner 80% safe zone, so Android launchers can crop it to a circle without
 clipping the flame.
+
+`design/og-phone.png` is a real capture of the Hoje screen (390x844, Chrome at
+device width), so the card carries the app's actual typography instead of a
+redrawn facsimile. Re-capture it at `/hoje` with a full day recorded:
+
+```bash
+playwright-cli resize 390 844 && playwright-cli goto http://localhost:8080/hoje
+playwright-cli screenshot --filename=design/og-phone.png
+```
+
+The card's own text uses Georgia, an editorial serif standing in for Literata
+because the rasteriser does not have Literata installed — the real typeface is
+carried by the embedded screenshot. Everything else — `og:title`,
+`og:description`, `og:url`, `og:locale`, `og:image`, and the full Twitter
+card — is generated per page by `pkg/cais/meta.PreviewHTML` in
+`amarraData`, absolute against `APP_URL` because crawlers neither resolve
+relative paths nor run JavaScript. Public pages carry their own description
+from the `meta.*.description` catalog keys; everything else falls back to the
+brand one. `internal/handlers/preview_test.go` pins both the tag set and the
+fact that `web/static/og.png` exists at the advertised path.
 
 ## Deploy
 

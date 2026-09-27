@@ -208,4 +208,11 @@ var ptMessages = map[string]string{
 	"error.not_found_title": "Não encontramos esta página",
 	"error.not_found_body":  "Talvez o caminho tenha mudado. Volte para o seu diário e continue de onde parou.",
 	"error.not_found_cta":   "Voltar para Hoje",
+
+	// Social preview copy for the pages a crawler can reach.
+	"meta.login.description":           "Reserve alguns minutos para cultivar a gratidão e a paz interior hoje. Um diário calmo, privado e sem ruído.",
+	"meta.signup.description":          "Crie seu espaço sagrado para cultivar paz, positividade e presença plena todos os dias.",
+	"meta.forgot_password.description": "Recupere o acesso ao seu diário de gratidão.",
+	"meta.reset_password.description":  "Escolha uma nova senha e volte para o seu diário de gratidão.",
+	"meta.not_found.description":       "Esta página não existe. Volte para o seu diário de gratidão e continue de onde parou.",
 }

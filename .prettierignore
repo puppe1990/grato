@@ -11,3 +11,6 @@ go.sum
 # Agent/tool local state, not project source.
 .commandcode/
 .design-import/
+
+# Playwright CLI session state.
+.playwright-cli/

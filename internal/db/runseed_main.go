@@ -5,9 +5,10 @@ package main
 import (
 	"log"
 
+	"github.com/puppe1990/amarra-cais/pkg/cais"
+
 	"github.com/puppe1990/grato/internal/db"
 	"github.com/puppe1990/grato/internal/store"
-	"github.com/puppe1990/amarra-cais/pkg/cais"
 )
 
 func main() {

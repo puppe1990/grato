@@ -40,7 +40,14 @@ func (h *AuthHandler) renderAuth(w http.ResponseWriter, r *http.Request, name st
 	if _, ok := extra["Title"]; !ok {
 		extra["Title"] = h.catalog.T("auth.login_title")
 	}
-	writeView(w, r, h.views, h.cfg, "app", name, amarraData(r, h.site, extra), status)
+	// Public pages are the only ones a crawler ever sees, so each carries its
+	// own social description.
+	if _, ok := extra["Description"]; !ok {
+		if description := pageDescription(h.catalog, name); description != "" {
+			extra["Description"] = description
+		}
+	}
+	writeView(w, r, h.views, h.cfg, "app", name, amarraData(r, h.site, h.catalog, extra), status)
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {

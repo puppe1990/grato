@@ -15,3 +15,6 @@ tmp/
 
 # Agent local state.
 .commandcode/
+
+# Playwright CLI session state.
+.playwright-cli/

@@ -208,4 +208,11 @@ var enMessages = map[string]string{
 	"error.not_found_title": "We could not find this page",
 	"error.not_found_body":  "Maybe the path changed. Head back to your journal and continue where you left off.",
 	"error.not_found_cta":   "Back to Today",
+
+	// Social preview copy for the pages a crawler can reach.
+	"meta.login.description":           "Take a few minutes to cultivate gratitude and inner peace today. A calm, private journal without the noise.",
+	"meta.signup.description":          "Create your sacred space to cultivate peace, positivity and full presence every day.",
+	"meta.forgot_password.description": "Recover access to your gratitude journal.",
+	"meta.reset_password.description":  "Choose a new password and return to your gratitude journal.",
+	"meta.not_found.description":       "This page does not exist. Head back to your gratitude journal and continue where you left off.",
 }

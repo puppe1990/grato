@@ -32,9 +32,10 @@ func NotFound(views *view.Renderer, site meta.Site, catalog *i18n.Catalog, cfg c
 				layout, nav = "app", "today"
 			}
 		}
-		writeView(w, r, views, cfg, layout, "not_found", amarraData(r, site, map[string]any{
-			"Title":     catalog.T("error.not_found_title"),
-			"ActiveNav": nav,
+		writeView(w, r, views, cfg, layout, "not_found", amarraData(r, site, catalog, map[string]any{
+			"Title":       catalog.T("error.not_found_title"),
+			"Description": pageDescription(catalog, "not_found"),
+			"ActiveNav":   nav,
 		}), http.StatusNotFound)
 	}
 }
