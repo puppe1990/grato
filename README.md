@@ -161,7 +161,7 @@ Jobs dashboard: `GET /jobs` (localhost only).
   bug — `stream.mjs` marks `<html data-amarra-stream="true">` as its
   "already started" flag and then matches that same attribute when scanning
   for stream roots, so it opens `new EventSource("true")`. Tracked in
-  [puppe1990/amarra-cais#150](https://github.com/puppe1990/amarra-cais/issues/150).
+  [puppe1990/amarra-cais#204](https://github.com/puppe1990/amarra-cais/issues/204).
   The vendored `web/static/js/amarra.js` is left untouched so it keeps
   matching what the framework generates.
 
