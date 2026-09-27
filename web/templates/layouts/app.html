@@ -113,10 +113,7 @@
       <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-espresso/[0.06] bg-linen/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden">
         <div amarra-hook="nav" data-amarra-nav-on="text-terracotta font-semibold" data-amarra-nav-off="text-clay" class="mx-auto flex max-w-md items-end justify-around px-2 py-2">
           <a href="/hoje" data-testid="nav-today" class="hearth-nav-link text-clay" {{ if eq .ActiveNav "today" }}aria-current="page"{{ end }}>{{ template "icon_sun" . }}{{ t "nav.today" }}</a>
-          <a href="/registrar" data-testid="nav-register" class="hearth-nav-link text-clay" {{ if eq .ActiveNav "register" }}aria-current="page"{{ end }}>
-            <span class="hearth-nav-fab">{{ template "icon_pen" . }}</span>
-            <span>{{ t "nav.register" }}</span>
-          </a>
+          <a href="/registrar" data-testid="nav-register" class="hearth-nav-link text-clay" {{ if eq .ActiveNav "register" }}aria-current="page"{{ end }}>{{ template "icon_pen" . }}{{ t "nav.register" }}</a>
           <a href="/memorias" data-testid="nav-memories" class="hearth-nav-link text-clay" {{ if eq .ActiveNav "memories" }}aria-current="page"{{ end }}>{{ template "icon_book" . }}{{ t "nav.memories" }}</a>
           <a href="/insights" data-testid="nav-insights" class="hearth-nav-link text-clay" {{ if eq .ActiveNav "insights" }}aria-current="page"{{ end }}>{{ template "icon_sprout" . }}{{ t "nav.insights" }}</a>
         </div>

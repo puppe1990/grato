@@ -20,18 +20,33 @@ func normalised(body string) string {
 // tagWith returns the opening tag carrying the given data-testid.
 func tagWith(body, testid string) (string, bool) {
 	marker := `data-testid="` + testid + `"`
-	normalisedBody := normalised(body)
-	start := strings.Index(normalisedBody, marker)
+	flat := normalised(body)
+	start := strings.Index(flat, marker)
 	if start < 0 {
 		return "", false
 	}
-	open := strings.LastIndex(normalisedBody[:start], "<")
-	end := strings.Index(normalisedBody[start:], ">")
+	open := strings.LastIndex(flat[:start], "<")
+	end := strings.Index(flat[start:], ">")
 	if open < 0 || end < 0 {
 		return "", false
 	}
-	return normalisedBody[open : start+end], true
+	return flat[open : start+end], true
 }
+
+func classAttr(tag string) string {
+	start := strings.Index(tag, `class="`)
+	if start < 0 {
+		return ""
+	}
+	rest := tag[start+len(`class="`):]
+	end := strings.Index(rest, `"`)
+	if end < 0 {
+		return ""
+	}
+	return rest[:end]
+}
+
+var bottomNavTabs = []string{"nav-today", "nav-register", "nav-memories", "nav-insights"}
 
 // renderDiaryPage drives the screen handler that owns a tab path.
 func renderDiaryPage(t *testing.T, h *DiaryHandler, userID int64, path string) *httptest.ResponseRecorder {
@@ -51,103 +66,83 @@ func renderDiaryPage(t *testing.T, h *DiaryHandler, userID int64, path string) *
 	return rr
 }
 
-// The tab bar must say which tab is current. Relying on colour alone failed:
-// the write button's filled circle sat directly above its label, so an orange
-// label under an orange circle read as part of the button rather than as
-// "you are here".
-func TestBottomNav_marksOnlyTheCurrentTab(t *testing.T) {
+// The tab bar must say which tab is current, and it must say it the same way
+// for all four. The write tab carried a circle of its own for a while, which
+// made one tab look like a button while the rest looked like tabs.
+func TestBottomNav_tabsAreIndistinguishableApartFromTheCurrentOne(t *testing.T) {
 	cases := []struct {
-		path     string
-		active   string
-		inactive []string
+		path   string
+		active string
 	}{
-		{"/hoje", "nav-today", []string{"nav-register", "nav-memories", "nav-insights"}},
-		{"/registrar", "nav-register", []string{"nav-today", "nav-memories", "nav-insights"}},
-		{"/memorias", "nav-memories", []string{"nav-today", "nav-register", "nav-insights"}},
-		{"/insights", "nav-insights", []string{"nav-today", "nav-register", "nav-memories"}},
+		{"/hoje", "nav-today"},
+		{"/registrar", "nav-register"},
+		{"/memorias", "nav-memories"},
+		{"/insights", "nav-insights"},
 	}
 
 	for _, tc := range cases {
 		h, _, user, _ := newDiaryHandler(t)
 		body := renderDiaryPage(t, h, user.ID, tc.path).Body.String()
 
-		tag, ok := tagWith(body, tc.active)
-		if !ok {
-			t.Fatalf("%s: %s not rendered", tc.path, tc.active)
-		}
-		if !strings.Contains(tag, `aria-current="page"`) {
-			t.Errorf("%s: %s should be aria-current=page, got: %s", tc.path, tc.active, tag)
-		}
-		for _, other := range tc.inactive {
-			tag, ok := tagWith(body, other)
+		classes := map[string]string{}
+		for _, tab := range bottomNavTabs {
+			tag, ok := tagWith(body, tab)
 			if !ok {
-				t.Fatalf("%s: %s not rendered", tc.path, other)
+				t.Fatalf("%s: %s not rendered", tc.path, tab)
 			}
-			if strings.Contains(tag, `aria-current`) {
-				t.Errorf("%s: %s must not be current, got: %s", tc.path, other, tag)
+			classes[tab] = classAttr(tag)
+
+			isCurrent := strings.Contains(tag, `aria-current="page"`)
+			if isCurrent != (tab == tc.active) {
+				t.Errorf("%s: %s aria-current = %v, want %v", tc.path, tab, isCurrent, tab == tc.active)
+			}
+		}
+
+		// Same class list on every tab: the current state rides on
+		// aria-current, so nothing has to be applied per tab at render time.
+		for _, tab := range bottomNavTabs {
+			if classes[tab] != classes[bottomNavTabs[0]] {
+				t.Errorf("%s: %s has class %q but %s has %q — tabs must match",
+					tc.path, tab, classes[tab], bottomNavTabs[0], classes[bottomNavTabs[0]])
 			}
 		}
 	}
 }
 
-// The write button's fill is what marks its tab as current, so the rule that
-// turns aria-current into a filled circle has to exist, and the resting state
-// must not paint one.
-func TestStylesheet_fillsTheWriteButtonOnlyWhenCurrent(t *testing.T) {
+// No tab may carry markup its siblings lack — that is what made the write tab
+// stand out, and a class-list comparison alone would not catch it.
+func TestBottomNav_noTabCarriesExtraMarkup(t *testing.T) {
+	h, _, user, _ := newDiaryHandler(t)
+	body := renderDiaryPage(t, h, user.ID, "/hoje").Body.String()
+
+	flat := normalised(body)
+	open := strings.Index(flat, `<nav class="fixed`)
+	if open < 0 {
+		t.Fatal("bottom navigation not found")
+	}
+	end := strings.Index(flat[open:], "</nav>")
+	if strings.Contains(flat[open:open+end], "hearth-nav-fab") {
+		t.Error("a tab carries a badge the others do not")
+	}
+
+	for _, tab := range bottomNavTabs {
+		tag, ok := tagWith(body, tab)
+		if !ok {
+			t.Fatalf("%s not rendered", tab)
+		}
+		if strings.Contains(tag, "<span") {
+			t.Errorf("%s wraps its icon in extra markup: %s", tab, tag)
+		}
+	}
+}
+
+// The stylesheet must not reintroduce a per-tab decoration.
+func TestStylesheet_hasNoWriteTabDecoration(t *testing.T) {
 	source, err := os.ReadFile(filepath.Join(projectRoot(t), "input.css"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	css := string(source)
-
-	resting, ok := cssBlock(css, ".hearth-nav-fab {")
-	if !ok {
-		t.Fatal("input.css has no .hearth-nav-fab rule")
-	}
-	if strings.Contains(resting, "bg-") {
-		t.Errorf("the resting write tab paints a badge the other tabs lack: %s", resting)
-	}
-	if !strings.Contains(resting, "h-5 w-5") {
-		t.Errorf("the resting write tab should be icon-sized, got: %s", resting)
-	}
-
-	current, ok := cssBlock(css, `.hearth-nav-link[aria-current="page"] .hearth-nav-fab {`)
-	if !ok {
-		t.Fatal("input.css is missing the current-tab rule for the write button")
-	}
-	for _, want := range []string{"bg-terracotta", "h-12 w-12"} {
-		if !strings.Contains(current, want) {
-			t.Errorf("the current write tab should be a filled button (%s), got: %s", want, current)
-		}
-	}
-}
-
-// cssBlock returns the declarations of the first rule with the given selector.
-func cssBlock(css, selector string) (string, bool) {
-	start := strings.Index(css, selector)
-	if start < 0 {
-		return "", false
-	}
-	open := strings.Index(css[start:], "{")
-	close := strings.Index(css[start:], "}")
-	if open < 0 || close < 0 || close < open {
-		return "", false
-	}
-	return css[start+open+1 : start+close], true
-}
-
-// The rendered write button must not carry a hardcoded fill: the fill is the
-// selected state, and a permanent one is the bug this guards.
-func TestBottomNav_writeButtonIsNotPermanentlyFilled(t *testing.T) {
-	h, _, user, _ := newDiaryHandler(t)
-	norm := normalised(renderDiaryPage(t, h, user.ID, "/hoje").Body.String())
-
-	for _, forbidden := range []string{"hearth-nav-fab bg-terracotta ", "hearth-nav-fab bg-terracotta\""} {
-		if strings.Contains(norm, forbidden) {
-			t.Errorf("write button hardcodes the selected fill: %q", forbidden)
-		}
-	}
-	if !strings.Contains(norm, `class="hearth-nav-fab"`) {
-		t.Error("write button should rely on .hearth-nav-fab alone")
+	if strings.Contains(string(source), "hearth-nav-fab") {
+		t.Error("input.css still styles a write-tab badge")
 	}
 }
