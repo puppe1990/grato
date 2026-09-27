@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/puppe1990/amarra-cais/pkg/amarra/view"
 	"github.com/puppe1990/amarra-cais/pkg/cais"
 	"github.com/puppe1990/amarra-cais/pkg/cais/i18n"
 	"github.com/puppe1990/amarra-cais/pkg/cais/meta"
@@ -27,7 +26,7 @@ const (
 // RequireAuth, but it re-checks the session anyway so a stale cookie can never
 // render an empty journal as if it belonged to the visitor.
 type DiaryHandler struct {
-	views   *view.Renderer
+	views   Renderers
 	store   store.Store
 	site    meta.Site
 	catalog *i18n.Catalog
@@ -35,7 +34,7 @@ type DiaryHandler struct {
 	now     func() time.Time
 }
 
-func NewDiaryHandler(views *view.Renderer, s store.Store, site meta.Site, catalog *i18n.Catalog, cfg cais.Config) *DiaryHandler {
+func NewDiaryHandler(views Renderers, s store.Store, site meta.Site, catalog *i18n.Catalog, cfg cais.Config) *DiaryHandler {
 	return &DiaryHandler{views: views, store: s, site: site, catalog: catalog, cfg: cfg, now: time.Now}
 }
 
@@ -45,6 +44,16 @@ func (h *DiaryHandler) locale(r *http.Request) string {
 		return catalog.Locale()
 	}
 	return h.catalog.Locale()
+}
+
+// catalogFor resolves the catalog for this request. Handler-built copy has to
+// come from here rather than h.catalog, or half the page follows the language
+// toggle (the templates do) while the other half stays in the boot locale.
+func (h *DiaryHandler) catalogFor(r *http.Request) *i18n.Catalog {
+	if catalog := i18n.CatalogFromRequest(r); catalog != nil {
+		return catalog
+	}
+	return h.catalog
 }
 
 func (h *DiaryHandler) currentUser(w http.ResponseWriter, r *http.Request) (models.User, bool) {
@@ -64,7 +73,7 @@ func (h *DiaryHandler) currentUser(w http.ResponseWriter, r *http.Request) (mode
 func (h *DiaryHandler) render(w http.ResponseWriter, r *http.Request, user *models.User, name string, extra map[string]any, status int) {
 	data := amarraData(r, h.site, h.catalog, extra)
 	if user != nil {
-		h.addHeaderData(data, *user)
+		h.addHeaderData(r, data, *user)
 	}
 	writeView(w, r, h.views, h.cfg, "app", name, data, status)
 }
@@ -72,7 +81,7 @@ func (h *DiaryHandler) render(w http.ResponseWriter, r *http.Request, user *mode
 // addHeaderData feeds the persistent chrome: the greeting name, the avatar
 // initial and the streak badge. They live inside #amarra-main so a Drive morph
 // after writing a moment never leaves a stale streak on screen.
-func (h *DiaryHandler) addHeaderData(data map[string]any, user models.User) {
+func (h *DiaryHandler) addHeaderData(r *http.Request, data map[string]any, user models.User) {
 	name := user.DisplayName()
 	data["UserName"] = name
 	data["UserInitial"] = initialOf(name)
@@ -83,7 +92,7 @@ func (h *DiaryHandler) addHeaderData(data map[string]any, user models.User) {
 	}
 	streak := gratitude.Streak(days, h.now())
 	data["StreakDays"] = streak
-	data["StreakBadge"] = h.catalog.T("today.days_badge", streak)
+	data["StreakBadge"] = h.catalogFor(r).T("today.days_badge", streak)
 }
 
 // initialOf renders the avatar glyph, tolerating an empty name.
@@ -99,12 +108,12 @@ func (h *DiaryHandler) fail(w http.ResponseWriter, err error) {
 }
 
 // moodChips renders "Como você está agora?" with the active chip selected.
-func (h *DiaryHandler) moodChips(active models.Mood, target string) []moodChip {
+func (h *DiaryHandler) moodChips(catalog *i18n.Catalog, active models.Mood, target string) []moodChip {
 	chips := make([]moodChip, 0, len(models.MoodValues))
 	for _, mood := range models.MoodValues {
 		chips = append(chips, moodChip{
 			Value:  string(mood),
-			Label:  h.catalog.T("mood." + string(mood)),
+			Label:  catalog.T("mood." + string(mood)),
 			Active: mood == active,
 			URL:    target + "?mood=" + string(mood),
 		})

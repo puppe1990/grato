@@ -6,6 +6,8 @@ import (
 
 	appi18n "github.com/puppe1990/grato/internal/i18n"
 
+	"github.com/puppe1990/amarra-cais/pkg/cais/i18n"
+
 	"github.com/puppe1990/grato/internal/models"
 )
 
@@ -49,16 +51,16 @@ func (h *DiaryHandler) Memories(w http.ResponseWriter, r *http.Request) {
 	locale := h.locale(r)
 
 	h.render(w, r, &user, "memories", map[string]any{
-		"Title":         h.catalog.T("nav.memories"),
+		"Title":         h.catalogFor(r).T("nav.memories"),
 		"ActiveNav":     "memories",
 		"Total":         total,
 		"MonthLabel":    appi18n.MonthYear(locale, now),
 		"Calendar":      buildCalendar(now, monthMoments),
 		"Weekdays":      calendarWeekdays(locale),
 		"MarkedCount":   markedDays(monthMoments),
-		"Filters":       tagFilters(h.catalog.T("memories.filter_all"), tags, filter),
+		"Filters":       tagFilters(h.catalogFor(r).T("memories.filter_all"), tags, filter),
 		"ActiveFilter":  filter,
-		"Entries":       h.entryViews(entries, locale),
+		"Entries":       h.entryViews(h.catalogFor(r), entries, locale),
 		"HasEntries":    len(entries) > 0,
 		"Featured":      featuredMoment(archive, now),
 		"FeaturedLabel": featuredLabel(h.catalog, archive, now),
@@ -75,14 +77,14 @@ type entryView struct {
 	Tags        []models.Tag
 }
 
-func (h *DiaryHandler) entryViews(moments []models.Moment, locale string) []entryView {
+func (h *DiaryHandler) entryViews(catalog *i18n.Catalog, moments []models.Moment, locale string) []entryView {
 	views := make([]entryView, 0, len(moments))
 	for _, moment := range moments {
 		views = append(views, entryView{
 			Moment:      moment,
 			DayLabel:    appi18n.DayMonth(locale, moment.HappenedAt),
 			TimeLabel:   appi18n.ClockTime(moment.HappenedAt),
-			MoodLabel:   h.catalog.T("mood." + string(moment.Mood)),
+			MoodLabel:   catalog.T("mood." + string(moment.Mood)),
 			ReadingTime: readingMinutes(moment.Body),
 			Tags:        moment.Tags,
 		})

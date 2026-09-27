@@ -12,7 +12,10 @@ import (
 	"github.com/puppe1990/amarra-cais/pkg/cais/flash"
 	"github.com/puppe1990/amarra-cais/pkg/cais/httpx"
 
+	"github.com/puppe1990/amarra-cais/pkg/cais/i18n"
+
 	"github.com/puppe1990/grato/internal/gratitude"
+
 	"github.com/puppe1990/grato/internal/models"
 )
 
@@ -58,18 +61,18 @@ func (h *DiaryHandler) Insights(w http.ResponseWriter, r *http.Request) {
 	series := gratitude.SerenitySeries(moments, serenityWindow, now)
 
 	h.render(w, r, &user, "insights", map[string]any{
-		"Title":         h.catalog.T("nav.insights"),
+		"Title":         h.catalogFor(r).T("nav.insights"),
 		"ActiveNav":     "insights",
 		"Stats":         stats,
-		"Milestones":    h.milestoneViews(milestones),
+		"Milestones":    h.milestoneViews(h.catalogFor(r), milestones),
 		"Unlocked":      gratitude.ReachedCount(milestones),
 		"Chart":         buildSerenityChart(series),
 		"HasChart":      len(series) > 1,
 		"Themes":        themeViews(gratitude.Themes(tagStats, 6)),
 		"HasThemes":     len(tagStats) > 0,
 		"MonthDays":     markedDays(monthMoments),
-		"MonthLabel":    h.catalog.T("insights.month_card_label"),
-		"Predominant":   h.catalog.T("insights.predominant", h.catalog.T("mood."+string(predominantMood(monthMoments)))),
+		"MonthLabel":    h.catalogFor(r).T("insights.month_card_label"),
+		"Predominant":   h.catalogFor(r).T("insights.predominant", h.catalogFor(r).T("mood."+string(predominantMood(monthMoments)))),
 		"SerenityDelta": serenityDelta(series),
 		"Ritual":        ritual,
 		"RitualKinds":   models.RitualNightReflection,
@@ -103,7 +106,7 @@ func (h *DiaryHandler) RitualPost(w http.ResponseWriter, r *http.Request) {
 		h.fail(w, err)
 		return
 	}
-	flash.Set(w, "notice", h.catalog.T("insights.ritual_title"), h.cfg.CookieSecure())
+	flash.Set(w, "notice", h.catalogFor(r).T("insights.ritual_title"), h.cfg.CookieSecure())
 	http.Redirect(w, r, insightsPath, http.StatusSeeOther)
 }
 
@@ -151,7 +154,7 @@ type milestoneView struct {
 	Reached bool
 }
 
-func (h *DiaryHandler) milestoneViews(milestones []models.Milestone) []milestoneView {
+func (h *DiaryHandler) milestoneViews(catalog *i18n.Catalog, milestones []models.Milestone) []milestoneView {
 	views := make([]milestoneView, 0, len(milestones))
 	for _, milestone := range milestones {
 		percent := 0
@@ -163,8 +166,8 @@ func (h *DiaryHandler) milestoneViews(milestones []models.Milestone) []milestone
 		}
 		views = append(views, milestoneView{
 			Key:     milestone.Key,
-			Title:   h.catalog.T("milestone." + milestone.Key + ".title"),
-			Body:    h.catalog.T("milestone."+milestone.Key+".body", milestone.Value),
+			Title:   catalog.T("milestone." + milestone.Key + ".title"),
+			Body:    catalog.T("milestone."+milestone.Key+".body", milestone.Value),
 			Value:   milestone.Value,
 			Goal:    milestone.Goal,
 			Percent: percent,

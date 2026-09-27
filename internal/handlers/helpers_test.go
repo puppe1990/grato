@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/puppe1990/amarra-cais/pkg/amarra/view"
@@ -18,33 +20,65 @@ func testSite() meta.Site {
 
 func projectRoot(t *testing.T) string {
 	t.Helper()
-	wd, err := os.Getwd()
+	root, err := repositoryRoot()
 	if err != nil {
 		t.Fatal(err)
 	}
+	return root
+}
+
+func repositoryRoot() (string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
 	for {
 		if _, err := os.Stat(filepath.Join(wd, "go.mod")); err == nil {
-			return wd
+			return wd, nil
 		}
 		parent := filepath.Dir(wd)
 		if parent == wd {
-			t.Fatal("go.mod not found")
+			return "", errors.New("go.mod not found above the test working directory")
 		}
 		wd = parent
 	}
 }
 
-func setupTestViews(t *testing.T) *view.Renderer {
+// Renderers are read-only once loaded, so the test binary builds them once
+// rather than re-parsing every template for every test.
+var (
+	testRenderersOnce sync.Once
+	testRenderers     Renderers
+	testRenderersErr  error
+)
+
+func setupTestViews(t *testing.T) Renderers {
 	t.Helper()
-	root := projectRoot(t)
-	fsys := os.DirFS(filepath.Join(root, "web", "templates"))
-	// The app's own catalog: an empty one would render raw keys and let a
-	// missing translation slip through the tests unnoticed.
-	r, err := view.Load(fsys, appi18n.DefaultCatalog())
-	if err != nil {
-		t.Fatal(err)
+	testRenderersOnce.Do(func() {
+		testRenderers, testRenderersErr = loadRenderers()
+	})
+	if testRenderersErr != nil {
+		t.Fatal(testRenderersErr)
 	}
-	return r
+	return testRenderers
+}
+
+func loadRenderers() (Renderers, error) {
+	root, err := repositoryRoot()
+	if err != nil {
+		return Renderers{}, err
+	}
+	fsys := os.DirFS(filepath.Join(root, "web", "templates"))
+
+	byLocale := make(map[string]*view.Renderer)
+	for tag, catalog := range appi18n.Catalogs() {
+		renderer, err := view.Load(fsys, catalog)
+		if err != nil {
+			return Renderers{}, err
+		}
+		byLocale[tag] = renderer
+	}
+	return Renderers{ByLocale: byLocale, Default: byLocale[appi18n.DefaultCatalog().Locale()]}, nil
 }
 
 func setupTestStore(t *testing.T) store.Store {

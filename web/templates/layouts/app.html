@@ -16,7 +16,7 @@
 {{- define "icon_streak" -}}
 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c1 3 4 4.5 4 8a4 4 0 11-8 0c0-1.2.5-2.2 1-3-2 1.5-4 3.8-4 7a7 7 0 1014 0c0-4.5-4-6.5-7-12z" /></svg>
 {{- end -}}
-{{- define "title" }}Grato · Diário da Gratidão{{ end }}
+{{- define "title" }}Grato · {{ t "brand.tagline" }}{{ end }}
 {{- define "description" }}Um diário de gratidão calmo e privado: registre três momentos por dia, reveja suas memórias e acompanhe seus ecos emocionais.{{ end -}}
 {{ define "app" }}
 <!doctype html>
@@ -30,7 +30,7 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     {{ if .CSRFToken }}<meta name="csrf-token" content="{{ .CSRFToken }}" />{{ end }}
-    <title>{{ if .Title }}{{ .Title }} · Grato{{ else }}Grato · Diário da Gratidão{{ end }}</title>
+    <title>{{ if .Title }}{{ .Title }} · Grato{{ else }}Grato · {{ t "brand.tagline" }}{{ end }}</title>
     {{ .Head }}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -54,7 +54,7 @@
             <span class="h-10 w-10 shrink-0">{{ template "icon_flame" . }}</span>
             <span>
               <span class="block font-serif text-xl leading-none">Grato</span>
-              <span class="mt-1 block text-[11px] font-medium uppercase tracking-[0.14em] text-umber">Diário da Gratidão</span>
+              <span class="mt-1 block text-[11px] font-medium uppercase tracking-[0.14em] text-umber">{{ t "brand.tagline" }}</span>
             </span>
           </a>
           <div amarra-hook="nav" data-amarra-nav-on="text-terracotta font-semibold" data-amarra-nav-off="text-umber hover:bg-linen/60" class="flex flex-col gap-1">

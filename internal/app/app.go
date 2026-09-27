@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/puppe1990/amarra-cais/pkg/amarra/live"
-	"github.com/puppe1990/amarra-cais/pkg/amarra/view"
 	"github.com/puppe1990/amarra-cais/pkg/cais"
 	"github.com/puppe1990/amarra-cais/pkg/cais/devlog"
 	"github.com/puppe1990/amarra-cais/pkg/cais/i18n"
@@ -18,12 +17,13 @@ import (
 	"github.com/puppe1990/amarra-cais/pkg/cais/middleware"
 	"github.com/puppe1990/amarra-cais/pkg/cais/netutil"
 
+	"github.com/puppe1990/grato/internal/handlers"
 	appi18n "github.com/puppe1990/grato/internal/i18n"
 	"github.com/puppe1990/grato/internal/store"
 )
 
 type Deps struct {
-	Views     *view.Renderer
+	Views     handlers.Renderers
 	Store     store.Store
 	StaticDir string
 	Site      meta.Site
@@ -38,7 +38,7 @@ type App struct {
 }
 
 func New(cfg cais.Config, deps Deps) (*App, error) {
-	if deps.Views == nil {
+	if deps.Views.Default == nil {
 		return nil, fmt.Errorf("views are required")
 	}
 	if deps.Store == nil {
@@ -56,10 +56,7 @@ func New(cfg cais.Config, deps Deps) (*App, error) {
 	r.Use(middleware.CSRF(cfg))
 	r.Use(middleware.LoadSession(deps.Store.Sessions()))
 	r.Use(middleware.Flash(cfg))
-	catalogs := map[string]*i18n.Catalog{
-		"en": appi18n.NewCatalog("en"),
-		"pt": appi18n.NewCatalog("pt"),
-	}
+	catalogs := appi18n.Catalogs()
 	r.Use(i18n.LocaleMiddleware(catalogs, cfg.Locale))
 	buf := devlog.Prepare(cfg.Env)
 	if buf != nil {

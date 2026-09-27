@@ -65,7 +65,7 @@ func (h *DiaryHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	var errs validate.FieldErrors
 	if form.Body == "" {
-		errs.Add("body", h.catalog.T("register.body_required"))
+		errs.Add("body", h.catalogFor(r).T("register.body_required"))
 	}
 	if errs.Any() {
 		h.renderRegister(w, r, user, form, errs, http.StatusUnprocessableEntity)
@@ -93,7 +93,7 @@ func (h *DiaryHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	flash.Set(w, "notice", h.catalog.T("register.saved"), h.cfg.CookieSecure())
+	flash.Set(w, "notice", h.catalogFor(r).T("register.saved"), h.cfg.CookieSecure())
 	http.Redirect(w, r, todayPath, http.StatusSeeOther)
 }
 
@@ -105,12 +105,12 @@ func (h *DiaryHandler) renderRegister(w http.ResponseWriter, r *http.Request, us
 	}
 
 	h.render(w, r, &user, "register", map[string]any{
-		"Title":       h.catalog.T("nav.register"),
+		"Title":       h.catalogFor(r).T("nav.register"),
 		"ActiveNav":   "register",
-		"Prompt":      h.catalog.T("register.prompt." + string(form.MomentOfDay)),
+		"Prompt":      h.catalogFor(r).T("register.prompt." + string(form.MomentOfDay)),
 		"Checkpoints": h.checkpointSwitcher(r, form.MomentOfDay),
 		"Bodies":      bodyInspirations(h.catalog),
-		"Moods":       h.moodChips(form.Mood, registerPath),
+		"Moods":       h.moodChips(h.catalogFor(r), form.Mood, registerPath),
 		"TagChoices":  tagChoices(tags, form.SelectedTags),
 		"Serenity":    form.Serenity,
 		"SerenityMax": models.SerenityMax,
@@ -125,7 +125,7 @@ func (h *DiaryHandler) checkpointSwitcher(r *http.Request, active models.MomentO
 	for _, ofDay := range models.MomentOfDayValues {
 		chips = append(chips, moodChip{
 			Value:  string(ofDay),
-			Label:  h.catalog.T("checkpoint." + string(ofDay)),
+			Label:  h.catalogFor(r).T("checkpoint." + string(ofDay)),
 			Active: ofDay == active,
 			URL:    registerPath + "?moment_of_day=" + string(ofDay),
 		})

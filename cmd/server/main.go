@@ -12,9 +12,11 @@ import (
 	"github.com/puppe1990/amarra-cais/pkg/amarra/view"
 	"github.com/puppe1990/amarra-cais/pkg/cais"
 	"github.com/puppe1990/amarra-cais/pkg/cais/boot"
+	"github.com/puppe1990/amarra-cais/pkg/cais/i18n"
 	"github.com/puppe1990/amarra-cais/pkg/cais/meta"
 
 	"github.com/puppe1990/grato/internal/app"
+	"github.com/puppe1990/grato/internal/handlers"
 	appi18n "github.com/puppe1990/grato/internal/i18n"
 	"github.com/puppe1990/grato/internal/store"
 	"github.com/puppe1990/grato/web"
@@ -70,10 +72,10 @@ func bootstrapWithConfig(cfg cais.Config) (*app.App, error) {
 		return nil, fmt.Errorf("templates: %w", err)
 	}
 
-	catalog := appi18n.NewCatalog(cfg.Locale)
-	views, err := view.Load(tmplFS, catalog)
+	catalogs := appi18n.Catalogs()
+	renderers, err := loadRenderers(tmplFS, catalogs, cfg.Locale)
 	if err != nil {
-		return nil, fmt.Errorf("views: %w", err)
+		return nil, err
 	}
 
 	s, err := store.NewSQLiteStore(cfg.DBPath, cfg.Env)
@@ -88,10 +90,30 @@ func bootstrapWithConfig(cfg cais.Config) (*app.App, error) {
 	}
 
 	return app.New(cfg, app.Deps{
-		Views:     views,
+		Views:     renderers,
 		Store:     s,
 		StaticDir: staticDir,
 		Site:      meta.SiteFrom("grato", cfg.AppURL),
-		Catalog:   catalog,
+		Catalog:   appi18n.NewCatalog(cfg.Locale),
 	})
+}
+
+// loadRenderers parses the templates once per locale. Templates bind their `t`
+// function at parse time, so one renderer per catalog is what lets a request
+// change the language; the boot locale is the fallback.
+func loadRenderers(fsys fs.FS, catalogs map[string]*i18n.Catalog, bootLocale string) (handlers.Renderers, error) {
+	byLocale := make(map[string]*view.Renderer, len(catalogs))
+	for tag, catalog := range catalogs {
+		renderer, err := view.Load(fsys, catalog)
+		if err != nil {
+			return handlers.Renderers{}, fmt.Errorf("views (%s): %w", tag, err)
+		}
+		byLocale[tag] = renderer
+	}
+
+	boot := byLocale[appi18n.Base(bootLocale)]
+	if boot == nil {
+		return handlers.Renderers{}, fmt.Errorf("views: no catalog for LOCALE=%q", bootLocale)
+	}
+	return handlers.Renderers{ByLocale: byLocale, Default: boot}, nil
 }

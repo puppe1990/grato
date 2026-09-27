@@ -5,7 +5,10 @@ import (
 
 	appi18n "github.com/puppe1990/grato/internal/i18n"
 
+	"github.com/puppe1990/amarra-cais/pkg/cais/i18n"
+
 	"github.com/puppe1990/grato/internal/gratitude"
+
 	"github.com/puppe1990/grato/internal/models"
 )
 
@@ -25,15 +28,15 @@ func (h *DiaryHandler) Today(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reflections := appi18n.ReflectionList(h.locale(r))
-	checkpoints, filled := h.checkpointsFor(moments)
+	checkpoints, filled := h.checkpointsFor(h.catalogFor(r), moments)
 
 	h.render(w, r, &user, "today", map[string]any{
-		"Title":       h.catalog.T("nav.today"),
+		"Title":       h.catalogFor(r).T("nav.today"),
 		"ActiveNav":   "today",
 		"Greeting":    appi18n.Greeting(h.locale(r), today),
 		"FullDate":    appi18n.FullDate(h.locale(r), today),
 		"Reflection":  reflections[gratitude.ReflectionOfDay(today, len(reflections))],
-		"Moods":       h.moodChips(todayMood(moments), registerPath),
+		"Moods":       h.moodChips(h.catalogFor(r), todayMood(moments), registerPath),
 		"Checkpoints": checkpoints,
 		"Filled":      filled,
 		"Total":       len(models.MomentOfDayValues),
@@ -53,7 +56,7 @@ type checkpointView struct {
 	Tags   []models.Tag
 }
 
-func (h *DiaryHandler) checkpointsFor(moments []models.Moment) ([]checkpointView, int) {
+func (h *DiaryHandler) checkpointsFor(catalog *i18n.Catalog, moments []models.Moment) ([]checkpointView, int) {
 	byOfDay := map[models.MomentOfDay]*models.Moment{}
 	for i := range moments {
 		if _, seen := byOfDay[moments[i].MomentOfDay]; !seen {
@@ -66,8 +69,8 @@ func (h *DiaryHandler) checkpointsFor(moments []models.Moment) ([]checkpointView
 	for _, ofDay := range models.MomentOfDayValues {
 		view := checkpointView{
 			OfDay:  ofDay,
-			Label:  h.catalog.T("checkpoint." + string(ofDay)),
-			Prompt: h.catalog.T("today.moments_hint"),
+			Label:  catalog.T("checkpoint." + string(ofDay)),
+			Prompt: catalog.T("today.moments_hint"),
 			URL:    registerPath + "?moment_of_day=" + string(ofDay),
 		}
 		if moment, ok := byOfDay[ofDay]; ok {

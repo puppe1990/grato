@@ -93,6 +93,7 @@ func pageDescription(catalog *i18n.Catalog, page string) string {
 
 // writeView names the layout at the call site: an app with a second layout (a
 // marketing "landing") must not render public pages inside the app chrome (#66).
-func writeView(w http.ResponseWriter, r *http.Request, views *view.Renderer, cfg cais.Config, layout, name string, data any, status int) {
-	view.Write(w, r, views, view.Page{Layout: layout, Name: name, Data: data, Status: status}, cfg)
+// The renderer is chosen per request so the copy follows the negotiated locale.
+func writeView(w http.ResponseWriter, r *http.Request, views Renderers, cfg cais.Config, layout, name string, data any, status int) {
+	view.Write(w, r, views.For(r), view.Page{Layout: layout, Name: name, Data: data, Status: status}, cfg)
 }

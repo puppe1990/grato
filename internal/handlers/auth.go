@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/puppe1990/amarra-cais/pkg/amarra/view"
 	"github.com/puppe1990/amarra-cais/pkg/cais"
 	"github.com/puppe1990/amarra-cais/pkg/cais/flash"
 	"github.com/puppe1990/amarra-cais/pkg/cais/httpx"
@@ -20,7 +19,7 @@ import (
 )
 
 type AuthHandler struct {
-	views       *view.Renderer
+	views       Renderers
 	store       store.Store
 	site        meta.Site
 	sessions    session.Store
@@ -29,7 +28,7 @@ type AuthHandler struct {
 	resetNotify passwordreset.Notifier
 }
 
-func NewAuthHandler(views *view.Renderer, s store.Store, site meta.Site, sessions session.Store, cfg cais.Config, catalog *i18n.Catalog) *AuthHandler {
+func NewAuthHandler(views Renderers, s store.Store, site meta.Site, sessions session.Store, cfg cais.Config, catalog *i18n.Catalog) *AuthHandler {
 	return &AuthHandler{views: views, store: s, site: site, sessions: sessions, cfg: cfg, catalog: catalog}
 }
 
@@ -38,7 +37,7 @@ func (h *AuthHandler) renderAuth(w http.ResponseWriter, r *http.Request, name st
 		extra = map[string]any{}
 	}
 	if _, ok := extra["Title"]; !ok {
-		extra["Title"] = h.catalog.T("auth.login_title")
+		extra["Title"] = h.catalogFor(r).T("auth.login_title")
 	}
 	// Public pages are the only ones a crawler ever sees, so each carries its
 	// own social description.
@@ -67,7 +66,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		email = "demo@example.com"
 	}
 	h.renderAuth(w, r, "login", map[string]any{
-		"Title": h.catalog.T("auth.login_title"),
+		"Title": h.catalogFor(r).T("auth.login_title"),
 		"Email": email,
 	}, 0)
 }
@@ -83,9 +82,9 @@ func (h *AuthHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
 	user, err := h.store.FindUserByEmail(email)
 	if err != nil || !session.VerifyPassword(user.PasswordHash, password) {
 		h.renderAuth(w, r, "login", map[string]any{
-			"Title":  h.catalog.T("auth.login_title"),
+			"Title":  h.catalogFor(r).T("auth.login_title"),
 			"Email":  email,
-			"Errors": validate.FieldErrors{"email": h.catalog.T("auth.invalid_credentials")},
+			"Errors": validate.FieldErrors{"email": h.catalogFor(r).T("auth.invalid_credentials")},
 		}, http.StatusUnprocessableEntity)
 		return
 	}
@@ -94,7 +93,7 @@ func (h *AuthHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	flash.Set(w, "notice", h.catalog.T("auth.welcome"), h.cfg.CookieSecure())
+	flash.Set(w, "notice", h.catalogFor(r).T("auth.welcome"), h.cfg.CookieSecure())
 	http.Redirect(w, r, todayPath, http.StatusSeeOther)
 }
 
@@ -109,7 +108,7 @@ func (h *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.renderAuth(w, r, "signup", map[string]any{
-		"Title":      h.catalog.T("auth.signup_title"),
+		"Title":      h.catalogFor(r).T("auth.signup_title"),
 		"Intention":  string(models.IntentionDefault),
 		"Intentions": intentionOptions(h.catalog),
 	}, 0)
@@ -129,16 +128,16 @@ func (h *AuthHandler) SignUpPost(w http.ResponseWriter, r *http.Request) {
 
 	var errs validate.FieldErrors
 	if name == "" {
-		errs.Add("name", h.catalog.T("auth.name_required"))
+		errs.Add("name", h.catalogFor(r).T("auth.name_required"))
 	}
 	if err := validate.Email(email); err != nil {
-		errs.Add("email", h.catalog.T("contact.email_invalid"))
+		errs.Add("email", h.catalogFor(r).T("contact.email_invalid"))
 	}
 	if err := validate.MinLength(password, 8); err != nil {
-		errs.Add("password", h.catalog.T("auth.password_too_short"))
+		errs.Add("password", h.catalogFor(r).T("auth.password_too_short"))
 	}
 	if password != confirm {
-		errs.Add("password_confirmation", h.catalog.T("auth.password_mismatch"))
+		errs.Add("password_confirmation", h.catalogFor(r).T("auth.password_mismatch"))
 	}
 	if !intention.Valid() {
 		intention = models.IntentionDefault
@@ -161,7 +160,7 @@ func (h *AuthHandler) SignUpPost(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		if errors.Is(err, store.ErrEmailTaken) {
-			h.renderSignUpErrors(w, r, name, email, string(intention), validate.FieldErrors{"email": h.catalog.T("auth.email_taken")})
+			h.renderSignUpErrors(w, r, name, email, string(intention), validate.FieldErrors{"email": h.catalogFor(r).T("auth.email_taken")})
 			return
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -172,13 +171,13 @@ func (h *AuthHandler) SignUpPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	flash.Set(w, "notice", h.catalog.T("auth.welcome"), h.cfg.CookieSecure())
+	flash.Set(w, "notice", h.catalogFor(r).T("auth.welcome"), h.cfg.CookieSecure())
 	http.Redirect(w, r, todayPath, http.StatusSeeOther)
 }
 
 func (h *AuthHandler) renderSignUpErrors(w http.ResponseWriter, r *http.Request, name, email, intention string, errs validate.FieldErrors) {
 	h.renderAuth(w, r, "signup", map[string]any{
-		"Title":      h.catalog.T("auth.signup_title"),
+		"Title":      h.catalogFor(r).T("auth.signup_title"),
 		"Name":       name,
 		"Email":      email,
 		"Intention":  intention,
@@ -209,7 +208,7 @@ func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, todayPath, http.StatusSeeOther)
 		return
 	}
-	h.renderAuth(w, r, "forgot_password", map[string]any{"Title": h.catalog.T("auth.forgot_password_title")}, 0)
+	h.renderAuth(w, r, "forgot_password", map[string]any{"Title": h.catalogFor(r).T("auth.forgot_password_title")}, 0)
 }
 
 func (h *AuthHandler) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
@@ -221,11 +220,11 @@ func (h *AuthHandler) ForgotPasswordPost(w http.ResponseWriter, r *http.Request)
 	email := strings.TrimSpace(r.FormValue("email"))
 	var errs validate.FieldErrors
 	if err := validate.Email(email); err != nil {
-		errs.Add("email", h.catalog.T("contact.email_invalid"))
+		errs.Add("email", h.catalogFor(r).T("contact.email_invalid"))
 	}
 	if errs.Any() {
 		h.renderAuth(w, r, "forgot_password", map[string]any{
-			"Title":  h.catalog.T("auth.forgot_password_title"),
+			"Title":  h.catalogFor(r).T("auth.forgot_password_title"),
 			"Email":  email,
 			"Errors": errs,
 		}, http.StatusUnprocessableEntity)
@@ -241,7 +240,7 @@ func (h *AuthHandler) ForgotPasswordPost(w http.ResponseWriter, r *http.Request)
 		_ = h.resetNotifier().NotifyReset(user.Email, token)
 	}
 
-	flash.Set(w, "notice", h.catalog.T("auth.reset_email_sent"), h.cfg.CookieSecure())
+	flash.Set(w, "notice", h.catalogFor(r).T("auth.reset_email_sent"), h.cfg.CookieSecure())
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
@@ -252,14 +251,14 @@ func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := strings.TrimSpace(r.URL.Query().Get("token"))
-	extra := map[string]any{"Title": h.catalog.T("auth.reset_password_title"), "Token": token}
+	extra := map[string]any{"Title": h.catalogFor(r).T("auth.reset_password_title"), "Token": token}
 	if token == "" {
-		extra["Errors"] = validate.FieldErrors{"token": h.catalog.T("auth.reset_invalid_token")}
+		extra["Errors"] = validate.FieldErrors{"token": h.catalogFor(r).T("auth.reset_invalid_token")}
 		h.renderAuth(w, r, "reset_password", extra, http.StatusUnprocessableEntity)
 		return
 	}
 	if _, ok := h.store.FindPasswordResetUserID(token); !ok {
-		extra["Errors"] = validate.FieldErrors{"token": h.catalog.T("auth.reset_invalid_token")}
+		extra["Errors"] = validate.FieldErrors{"token": h.catalogFor(r).T("auth.reset_invalid_token")}
 		h.renderAuth(w, r, "reset_password", extra, http.StatusUnprocessableEntity)
 		return
 	}
@@ -278,24 +277,24 @@ func (h *AuthHandler) ResetPasswordPost(w http.ResponseWriter, r *http.Request) 
 
 	var errs validate.FieldErrors
 	if token == "" {
-		errs.Add("token", h.catalog.T("auth.reset_invalid_token"))
+		errs.Add("token", h.catalogFor(r).T("auth.reset_invalid_token"))
 	} else if _, ok := h.store.FindPasswordResetUserID(token); !ok {
 		h.renderAuth(w, r, "reset_password", map[string]any{
-			"Title":  h.catalog.T("auth.reset_password_title"),
+			"Title":  h.catalogFor(r).T("auth.reset_password_title"),
 			"Token":  token,
-			"Errors": validate.FieldErrors{"token": h.catalog.T("auth.reset_invalid_token")},
+			"Errors": validate.FieldErrors{"token": h.catalogFor(r).T("auth.reset_invalid_token")},
 		}, http.StatusUnprocessableEntity)
 		return
 	}
 	if err := validate.MinLength(password, 8); err != nil {
-		errs.Add("password", h.catalog.T("auth.password_too_short"))
+		errs.Add("password", h.catalogFor(r).T("auth.password_too_short"))
 	}
 	if password != confirm {
-		errs.Add("password_confirmation", h.catalog.T("auth.password_mismatch"))
+		errs.Add("password_confirmation", h.catalogFor(r).T("auth.password_mismatch"))
 	}
 	if errs.Any() {
 		h.renderAuth(w, r, "reset_password", map[string]any{
-			"Title":  h.catalog.T("auth.reset_password_title"),
+			"Title":  h.catalogFor(r).T("auth.reset_password_title"),
 			"Token":  token,
 			"Errors": errs,
 		}, http.StatusUnprocessableEntity)
@@ -309,14 +308,14 @@ func (h *AuthHandler) ResetPasswordPost(w http.ResponseWriter, r *http.Request) 
 	}
 	if err := h.store.ResetPasswordWithToken(token, hash); err != nil {
 		h.renderAuth(w, r, "reset_password", map[string]any{
-			"Title":  h.catalog.T("auth.reset_password_title"),
+			"Title":  h.catalogFor(r).T("auth.reset_password_title"),
 			"Token":  token,
-			"Errors": validate.FieldErrors{"token": h.catalog.T("auth.reset_invalid_token")},
+			"Errors": validate.FieldErrors{"token": h.catalogFor(r).T("auth.reset_invalid_token")},
 		}, http.StatusUnprocessableEntity)
 		return
 	}
 
-	flash.Set(w, "notice", h.catalog.T("auth.reset_success"), h.cfg.CookieSecure())
+	flash.Set(w, "notice", h.catalogFor(r).T("auth.reset_success"), h.cfg.CookieSecure())
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
@@ -325,4 +324,13 @@ func (h *AuthHandler) resetNotifier() passwordreset.Notifier {
 		return h.resetNotify
 	}
 	return passwordreset.NotifierFromConfig(h.cfg, h.site.AppName)
+}
+
+// catalogFor resolves the catalog for this request, so validation, flash and
+// title copy follow the language toggle the same way the templates do.
+func (h *AuthHandler) catalogFor(r *http.Request) *i18n.Catalog {
+	if catalog := i18n.CatalogFromRequest(r); catalog != nil {
+		return catalog
+	}
+	return h.catalog
 }

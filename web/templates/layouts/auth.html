@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     {{ if .CSRFToken }}<meta name="csrf-token" content="{{ .CSRFToken }}" />{{ end }}
-    <title>{{ if .Title }}{{ .Title }} · Grato{{ else }}Grato · Diário da Gratidão{{ end }}</title>
+    <title>{{ if .Title }}{{ .Title }} · Grato{{ else }}Grato · {{ t "brand.tagline" }}{{ end }}</title>
     {{ .Head }}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
